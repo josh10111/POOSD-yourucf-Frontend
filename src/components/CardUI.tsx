@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
+import { buildPath } from './Path.tsx';
+
 
 function CardUI() {
-
     let _ud: any = localStorage.getItem('user_data');
     let ud = JSON.parse(_ud);
-    let userId: string = ud.id;
-    // let firstName: string = ud.firstName;
-    // let lastName: string = ud.lastName;
+    
+    let userId: string = ud.userId;
+    //var firstName = ud.firstName;
+    //var lastName = ud.lastName;
 
     const [message, setMessage] = useState('');
     const [searchResults, setResults] = useState('');
@@ -14,20 +16,12 @@ function CardUI() {
     const [search, setSearchValue] = React.useState('');
     const [card, setCardNameValue] = React.useState('');
 
-    const app_name = 'yourucf.com';
-    function buildPath(route: string): string {
-        if (process.env.NODE_ENV != 'development') {
-            return 'http://' + app_name + ':5000/' + route;
-        }
-        else {
-            return 'http://localhost:5000/' + route;
-        }
-    }
-
     async function addCard(e: any): Promise<void> {
         e.preventDefault();
-        let obj = { userId: userId, card: card };
-        let js = JSON.stringify(obj);
+        var storage = require('../tokenStorage.js')
+        var obj = { userId: userId, card: card, jwtToken:storage.retrieveToken()};
+        var js = JSON.stringify(obj);
+
         try {
             const response = await
                 fetch(buildPath('api/addCard'),
@@ -37,13 +31,16 @@ function CardUI() {
                                 'application/json'
                         }
                     });
+
             let txt = await response.text();
             let res = JSON.parse(txt);
+
             if (res.error.length > 0) {
                 setMessage("API Error:" + res.error);
             }
             else {
                 setMessage('Card has been added');
+                storage.storeToken(res.jwtToken);
             }
         }
         catch (error: any) {
@@ -53,8 +50,9 @@ function CardUI() {
 
     async function searchCard(e: any): Promise<void> {
         e.preventDefault();
-        let obj = { userId: userId, search: search };
-        let js = JSON.stringify(obj);
+        var storage = require('../tokenStorage.js')
+        var obj = { userId: userId, search: search, jwtToken:storage.retrieveToken()};
+        var js = JSON.stringify(obj);
         try {
             const response = await
                 fetch(buildPath('api/searchCards'),
@@ -64,10 +62,12 @@ function CardUI() {
                                 'application/json'
                         }
                     });
+
             let txt = await response.text();
             let res = JSON.parse(txt);
             let _results = res.results;
             let resultText = '';
+
             for (let i = 0; i < _results.length; i++) {
                 resultText += _results[i];
                 if (i < _results.length - 1) {
@@ -76,6 +76,7 @@ function CardUI() {
             }
             setResults('Card(s) have been retrieved');
             setCardList(resultText);
+            storage.storeToken(res.jwtToken)
         }
         catch (error: any) {
             alert(error.toString());
