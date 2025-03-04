@@ -1,0 +1,46 @@
+name: Deploy Frontend to DigitalOcean
+
+on:
+  push:
+    branches:
+      - main  # Triggers on pushes to main
+  workflow_dispatch:  # Optional: allows manual triggering
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Deploy to DigitalOcean via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: |
+            ${{ secrets.SSH_KEY }}
+          script: |
+            cd /var/www/mern_app/frontend
+            
+            # Ensure GitHub's host key is known to avoid host key verification errors
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
+            
+            # Pull the latest changes from the frontend repo
+            git pull origin main
+            
+            # Install dependencies (if needed)
+            npm install
+            
+            # Build the production version of your frontend
+            npm run build
+            
+            # (Optional) Restart a frontend server if you're serving the build via a Node server.
+            # If using Nginx to serve static files, you might not need this step.
+            # For example, if using PM2 for a static server:
+            # pm2 restart frontend
+            
+            # You can also copy the build folder to a specific directory if needed.
+            
+            echo "Deployment complete!"
