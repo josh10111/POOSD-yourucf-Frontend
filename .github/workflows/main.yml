@@ -36,6 +36,6 @@ jobs:
             npm run build
             
             # (Optional)
-            # pm2 restart frontend
+            pm2 restart frontend
             
             echo "Deployment complete"
