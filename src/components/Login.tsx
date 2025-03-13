@@ -17,7 +17,7 @@ function Login()
         var js = JSON.stringify(obj);
         try
         {
-            const response = await fetch('http://localhost:5000/api/login',
+            const response = await fetch('http://yourucf.com/api/login',
                 {method:'POST',body:js,headers:{'Content-Type':
         'application/json'}});
             var res = JSON.parse(await response.text());
@@ -52,7 +52,7 @@ function Login()
         var js = JSON.stringify(obj);
         try
         {
-            const response = await fetch('http://localhost:5000/api/register',
+            const response = await fetch('http://yourucf.com/api/register',
                 {method:'POST',body:js,headers:{'Content-Type':
         'application/json'}});
             var res = JSON.parse(await response.text());
