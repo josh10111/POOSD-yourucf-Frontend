@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import '../Login.css';
 function Login()
 {   
-    const [message,setMessage] = useState('');
+    const [, setMessage] = useState('');
     const [username,setUsername] = React.useState('');
     const [password,setPassword] = React.useState('');
     const [firstName, setFirstName] = React.useState('');
