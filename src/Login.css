@@ -42,22 +42,26 @@ input::placeholder
 
 
 #loginButton, #registerButton {
-    width: 100%;
-    background-color: #E7CA52;
-    color: black;
+    display: block;
+    width: 80%;
+    height: 45px;
+    background: #F1CA3B;
     border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    padding: 10px;
-    margin: 10px 0;
+    outline: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 20px;
+    color: black;
+    font-weight: 600;
+    margin: 0 auto;
 }
 
 #loginButton:hover {
-    background-color: #baa242;
+    color:#ffffff;
 }
 
 
-#forgotPassword, #toggleForm {
+#forgotPassword {
     font-size: 14px;
     color: white;
     text-align: center;
@@ -66,6 +70,141 @@ input::placeholder
 }
 
 
-#forgotPassword:hover, #toggleForm:hover {
+#forgotPassword:hover {
     text-decoration: underline;
 }
+
+
+.form {
+    width: 510px;
+    min-width: 500px;
+    background-color: rbga (88,81,152,.15);
+    color:#fff;
+    backdrop-filter: blur(25px);
+    border: 2px solid transparent;
+    border-radius: 15px;
+    padding-top: 60px;
+    border-color: #F1CA3B;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    
+}
+
+.form .formTitle {
+    font-size: 36px;
+    text-align: center;
+    padding-bottom: 40px;
+}
+
+.form .inputBox {
+    position: relative;
+    width: 100%;
+    height: 45px;
+    margin: 10px 0px;
+    padding-left: 10%;
+    padding-right: 10%;
+}
+
+.inputBox input {
+    width: 100%;
+    height: 100%;
+    background:#ffffff;
+    outline: none;
+    border: 1px solid #b6b6b6;
+    border-radius: 7px;
+    color:#b6b6b6;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 15px 45px 15px 10px;
+}
+
+.inputBox input::placeholder {
+    color: #b6b6b6;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.inputBox i {
+    position: absolute;
+    right: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: #b6b6b6;
+}
+
+.form .formText {
+    font-size: 14px;
+    text-align: center;
+    color: #ffffff;
+    padding-bottom: 30px;
+}
+
+.formText a {
+    color:#F1CA3B;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.formText a:hover {
+    color:#ffffff;
+    text-decoration: underline;
+}
+
+.form .spacer {
+
+    text-align: center;
+    padding-bottom: 30px;
+    padding-top: 20px;
+    font-size: 25px;
+    font-weight: 500;
+}
+
+.spacer i {
+    transform: translateY(50%);
+    font-weight: 100;
+}
+.spacer a {
+    font-weight: 100;
+    color:#ffffff;
+    text-decoration: none;
+}
+.spacer a:hover {
+    color:#F1CA3B;
+}
+
+.form .formText2 {
+    font-size: 16px;
+    text-align: center;
+    color: #ffffff;
+}
+
+.formText2 a {
+    color:#F1CA3B;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.formText2 a:hover {
+    color:#ffffff;
+    text-decoration: underline;
+}
+
+
+.links {
+    text-align: center;
+    bottom: 0px;
+    padding-top: 70px;
+    padding-bottom: 10px;
+}
+
+.links a {
+    justify-content:space-around;
+    padding-left: 15px;
+    padding-right: 15px;
+    color:#fff;
+    word-spacing: 10px;
+}
+
