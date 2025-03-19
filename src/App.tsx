@@ -6,7 +6,6 @@ function App() {
   return (
     <Router>
       <div>
-       <h1>Welcome to YourUCF</h1>
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="*" element={<Navigate to="/" />} />
