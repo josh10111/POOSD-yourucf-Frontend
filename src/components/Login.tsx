@@ -8,7 +8,14 @@ function Login()
     const [firstName, setFirstName] = React.useState('');
     const [lastName, setLastName] = React.useState('');
     const [isLogin, setIsLogin] = useState(true);
-    //const [email, setEmail] = React.useState('');
+    const [email, setEmail] = React.useState('');
+    const [login, setLogin] = React.useState('');
+
+    function is_valid_email_format(emailToCheck: string): boolean {
+        const hasAt = emailToCheck.includes('@');
+        const hasDot = emailToCheck.includes('.');
+        return hasAt && hasDot;
+      }
 
     async function doLogin(event:any) : Promise<void>
     {
@@ -49,7 +56,12 @@ function Login()
     {
         event.preventDefault();
 
-        var obj = {firstName: firstName, lastName: lastName, username: username, password:password, };
+        if (!is_valid_email_format(email)) {
+            setMessage('Please enter a valid email address (e.g., user@example.com)');
+            return; // Stop the registration process
+          }
+
+        var obj = {firstName: firstName, lastName: lastName, login: login, password:password, email: email};
         var js = JSON.stringify(obj);
         try
         {
@@ -64,6 +76,7 @@ function Login()
             else
             {
                 setMessage(`${firstName} ${lastName} signed up successfully!`)
+                window.location.href = '/verify';
                 setIsLogin(true);
             }
         }
@@ -94,26 +107,19 @@ function Login()
     {
         setLastName( e.target.value );
     }
-    /*
+    
     function handleSetEmail( e: any ) : void
     {
         setEmail( e.target.value );
     }
-    */
-    return( 
-        <div className="form">
-            {/* shows either Welcome back, Knight OR Create Account*/}
-            <div className="formTitle">
-                {isLogin ? (
-                    <>
-                        <span style={{ fontWeight: 500 }}>Welcome back,</span>{' '}
-                        <span style={{ fontWeight: 700, color: '#F1CA3B' }}>Knight!</span>
-                    </>
-                    ) : (
-                        <span style={{ fontWeight: 700, color: '#F1CA3B' }}>Create Account</span>
-                )}
-            </div>
 
+    function handleSetLogin( e: any ) : void
+    {
+        setLogin( e.target.value );
+    }
+    
+    return(
+        <div className="container">
             {/* determines which form is used*/}
             {(() =>
             {
@@ -122,21 +128,36 @@ function Login()
                 {
                     return(
                         <form onSubmit={doLogin}>
-                            <div className='inputBox'>
+                            <div className="formTitle">
+                                <span style={{fontWeight: 500}}>Welcome,</span> <span style= {{fontWeight: 700, color: '#F1CA3B'}}>Knight!</span>
+                             </div>
+                            <div className="inputBox">
                                 <input type="text" id="username" placeholder="Username" onChange={handleSetUserName} />
-                                <i className='bx bx-user'></i>
+                                <i className='bx bxs-user'></i>
                             </div>
                             <div className='inputBox'>
                                 <input type="password" id="password" placeholder="Password" onChange={handleSetPassword} />
-                                <i className='bx bx-lock-alt'></i>
-                            </div>
-
-                            <div className='formText'>
-                                <span>Forgot password?</span>
-                                <a href="/forgot-password" id="forgotPassword">Reset</a>
+                                <i className='bx bxs-lock-alt'></i>
                             </div>
                             
                             <input type="submit" id="loginButton" value="Login" />
+
+                            <div className="spacer">
+                                <span>____________</span>
+                                    <a href="https://github.com/josh10111/POOSD-yourucf-Frontend" target="_blank" rel="noopener noreferrer">
+                                    <i className='bx bxl-github'></i>
+                                    </a>
+                                <span>____________</span> 
+                            </div>
+                            <div className ="formText2">
+                                <span>Don't have an account?</span>
+                                <a href="#">Sign up</a>
+                            </div>
+                            <div className="links">
+                                <a href="https://www.ucf.edu/" target="_blank" rel="noopener noreferrer">UCF</a>
+                                <a href="https://webcourses.ucf.edu/" target="_blank" rel="noopener noreferrer">webcourses</a>
+                                <a href="https://my.ucf.edu/" target="_blank" rel="noopener noreferrer">myUCF</a>
+                            </div>
                         </form>
                     );
                 }
@@ -144,66 +165,61 @@ function Login()
                 {
                     return(
                         <form onSubmit={doRegister}>
+                            <div className="formTitle">
+                                <span style={{fontWeight: 700, color: '#F1CA3B'}}>Create Account</span>
+                            </div>
                             <div className='inputBox'>
                                 <input type="text" id="firstName" placeholder="First Name" value={firstName} onChange={handleSetFirstName} />
-                                <i className='bx bx-first-page'></i>
                             </div>
                             <div className='inputBox'>
                                 <input type="text" id="lastName" placeholder="Last Name" value={lastName} onChange={handleSetLastName} />
-                                <i className='bx bx-first-page'></i>
                             </div>
-                            {/*
                             <div className='inputBox'>
                                 <input type="text" id="email" placeholder="Email" value={firstName} onChange={handleSetEmail} />
-                                <i className='bx bx-envelope' ></i>
+                                <i className='bx bxs-envelope' ></i>
                             </div>
-                            */}
                             <div className='inputBox'>
-                                <input type="text" id="userName" placeholder="Username" value={username} onChange={handleSetUserName} />
-                                <i className='bx bx-user'></i>
+                                <input type="text" id="login" placeholder="Username" value={login} onChange={handleSetLogin} />
+                                <i className='bx bxs-user'></i>
                             </div>
                             <div className='inputBox'>
                                 <input type="password" id="password" placeholder="Password" value={password} onChange={handleSetPassword} />
-                                <i className='bx bx-lock-alt'></i>
+                                <i className='bx bxs-lock-alt'></i>
                             </div>
                             
                             <input type="submit" id="registerButton" value="Register" />
+
+                            <div className="spacer">
+                                <span>____________</span>
+                                    <a href="https://github.com/josh10111/POOSD-yourucf-Frontend" target="_blank" rel="noopener noreferrer">
+                                    <i className='bx bxl-github'></i>
+                                    </a>
+                                <span>____________</span> 
+                            </div>
+                            <div className ="formText2">
+                                <span>Already have an account?</span>
+                            <a href="#">Login</a>
+                            </div>
+                            <div className="links">
+                                <a href="https://www.ucf.edu/" target="_blank" rel="noopener noreferrer">UCF</a>
+                                <a href="https://webcourses.ucf.edu/" target="_blank" rel="noopener noreferrer">webcourses</a>
+                                <a href="https://my.ucf.edu/" target="_blank" rel="noopener noreferrer">myUCF</a>
+                            </div>
                         </form>
                     );
                 }
             })()}
 
-            {/* spacer w/ git link*/}
-            <div className='spacer'>
-                <span>____________</span>
-                <a href="https://github.com/josh10111/POOSD-yourucf-Frontend"></a>
-                <i className='bx bxl-github'></i>
-                <span>____________</span>
-            </div>
-
-            {/* determins bottom text of form*/}
-            <div className='formText2'>
-                {isLogin ? (
-                        <>
-                            <span>Don't have an account?</span>
-                            <a href="#" id="toggleForm"onClick={() => setIsLogin(!isLogin)}>Sign up</a>
-                        </>
-                    ) : (
-                        <>
-                            <span>Already have an account?</span>
-                            <a href="#" id="toggleForm"onClick={() => setIsLogin(!isLogin)}>Login</a>
-                        </>
-                )}
-            </div>
-
-            {/* links to other resources users may need*/}
-            <div className="links">
-                <a href="https://www.ucf.edu/">UCF</a>
-                <a href="https://webcourses.ucf.edu/">webcourses</a>
-                <a href="https://my.ucf.edu/">myUCF</a>
+            {/*left side of box*/}
+            <div className="toggle-box">
+                <div className="panel">
+                    <img src="assets/ucf_constellation_logo.PNG" alt="UCF constellation logo"></img>
+                    <h1>yourUCF</h1>
+                    <h3>Chart your UCF path to</h3>
+                    <h2>graduation</h2>
+                </div>
             </div>
         </div>
-
         );
 };
 export default Login;
