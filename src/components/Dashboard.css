@@ -1,0 +1,78 @@
+body 
+{
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;;
+    margin:0;
+}
+.dashboard-container
+{ 
+    text-align:left;  
+}
+.semester-container 
+{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    margin-top: 20px;
+
+}
+.semester-tile
+{
+    padding: 16px;
+    background-color:white; 
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    margin: 15px;
+    overflow: hidden;
+    display:flex; 
+    flex-direction: column;
+}
+.semester-header
+{
+    background-color: rgb(76, 32, 138);
+    color:white;
+    padding: 10px;
+}
+.drag-drop-area 
+{
+    padding: 50px; 
+    text-align: center;
+    background-color:white;
+    flex-grow:1;
+}
+.tile-labels
+{
+    background-color: rgb(76, 32, 138);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+  
+.delete-button
+{
+    background-color: rgb(76, 32, 138);
+    color: white;
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 5px;
+
+}
+.search-input,.search-dropdown,.Add-Semester-Button,.search-button
+{
+    background-color: black;
+    color: white;
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    margin-right:10px;
+
+
+}
+.search-input::placeholder
+{
+    color:white;    
+}
+
