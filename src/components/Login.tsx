@@ -123,21 +123,21 @@ function Login() {
     } else {
       setLoginError(false);
     }
-    if (!password) {
+    if (!password ) {
       setPasswordError(true);
       hasErrors = true;
-    }else if(hasMinLength){
-        setPasswordError(true);
-         hasErrors = true;
-    }else if(hasUpperCase){
-        setPasswordError(true);
-         hasErrors = true;
-    }else if(hasLowerCase){
-        setPasswordError(true);
-         hasErrors = true;
-    }else if(hasSpecialChar){
-        setPasswordError(true);
-         hasErrors = true;
+    }else if(!hasMinLength){
+      setPasswordError(true);
+       hasErrors = true;
+  }else if(!hasUpperCase){
+      setPasswordError(true);
+       hasErrors = true;
+  }else if(!hasLowerCase){
+      setPasswordError(true);
+       hasErrors = true;
+  }else if(!hasSpecialChar){
+      setPasswordError(true);
+       hasErrors = true;
     } else {
       setPasswordError(false);
     }
