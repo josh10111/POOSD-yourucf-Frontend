@@ -14,6 +14,7 @@ body {
     background-image: url('assets/background.PNG');
     background-position: center center;
     background-size: cover;
+    background-attachment: fixed;
 }
 
 .container {
@@ -39,11 +40,34 @@ body {
     color: #fff;
     text-align: center;
     padding: 40px;
+    overflow-y: auto;
     z-index: 1;
 }
 
+.form-box::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  
+  .form-box::-webkit-scrollbar-track {
+    background: none;
+    border-radius: 10px;
+  }
+  
+  .form-box::-webkit-scrollbar-thumb {
+    background: #F1CA3B;
+    border-radius: 10px;
+  }
+  
+  .form-box::-webkit-scrollbar-thumb:hover {
+    background: #5043c0;
+  }
+  
+  .form-box::-webkit-scrollbar-corner {
+    background: none;
+  }
 
-.form-box.register {
+#form-box.register {
     visibility: hidden;
 }
 
@@ -87,8 +111,15 @@ form {
     color:#888;
 }
 
+.inputBox.error input::placeholder{
+    color:#e71111;
+}
+.inputBox.error i{
+    color:#e71111;
+}
+
 .formText {
-    margin: -15px 0 15px;
+    margin: 15px 0 15px;
 }
 
 .formText a {
@@ -102,7 +133,7 @@ form {
     text-decoration: underline;
 }
 
-.button {
+#loginButton, #registerButton, #button{
     margin-top: 20px;
     width: 100%;
     height: 48px;
@@ -118,13 +149,36 @@ form {
 
 }
 
-.button:hover {
+#loginButton:hover {
     background-color: #5043c0; 
     transform: translateY(-1px); 
     box-shadow: 0 5px 7px rgba(0, 0, 0, 0.3); 
 }
 
-.button:active {
+#loginButton:active {
+    background-color: #5043c0; 
+    transform: translateY(1px); 
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); 
+}
+#registerButton:hover {
+    background-color: #5043c0; 
+    transform: translateY(-1px); 
+    box-shadow: 0 5px 7px rgba(0, 0, 0, 0.3); 
+}
+
+#registerButton:active {
+    background-color: #5043c0; 
+    transform: translateY(1px); 
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); 
+}
+
+#button:hover {
+    background-color: #5043c0; 
+    transform: translateY(-1px); 
+    box-shadow: 0 5px 7px rgba(0, 0, 0, 0.3); 
+}
+
+#button:active {
     background-color: #5043c0; 
     transform: translateY(1px); 
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); 
@@ -170,10 +224,12 @@ form {
 }
 
 .links {
+    text-decoration: underline;
     text-align: center;
     bottom: 0px;
     padding-top: 70px;
     padding-bottom: 0px;
+    
 }
 
 .links a {
@@ -281,6 +337,51 @@ form {
 .verification-box a:hover{
     color:#fff;
 }
+
+.message {
+    color: red;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.passBox {
+    margin-top: -25px;
+    margin-left: 20px;
+    text-align: left;
+    padding-bottom: 15px;
+}
+
+.passBox text {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.password-requirements {
+    list-style-type: none;
+    padding: 0;
+
+  }
+  
+  .password-requirements li {
+    color: #888;
+    margin-bottom: 2px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  .password-requirements li.met {
+    color: #888;
+    font-weight: 300;
+  }
+  
+  .password-requirements li.not-met {
+    color: #F1CA3B;
+  }
+  
+  .password-requirements li i{
+    font-size: 16px;
+    transform: translateY(10%);
+  }
 
 @media screen and (max-width: 900px){
     .container {
