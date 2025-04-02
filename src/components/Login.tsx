@@ -147,7 +147,7 @@ function Login() {
       return;
     }
 
-    var obj = { firstName: firstName, lastName: lastName, login: login, password: password, email: email };
+    var obj = { firstName: firstName, lastName: lastName, username: login, password: password, email: email };
     var js = JSON.stringify(obj);
     try {
       const response = await fetch('https://yourucf.com/api/users/register', {
