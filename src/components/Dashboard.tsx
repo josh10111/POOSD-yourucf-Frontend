@@ -3,6 +3,16 @@ import './Dashboard.css';
 
 function Dashboard() 
 {
+  const [userId, setUserId] = useState<string>('');
+  const [message, setMessage] = useState('');
+  const [semesterName, setSemesterName] = useState('');
+  const [year, setYear] = useState('');
+  const [semesters, setSemesters] = useState<{ _id: string; semester: string; year: string; courses: any[] }[]>([]);
+  const [showAddSemesterForm, setShowAddSemesterForm] = useState(false);
+  const[searchValue, setSearchValue] = useState('');
+  const[searchMode, setSearchMode] = useState(2);
+  const [availableClasses, setAvailableClasses] = useState<{ _id: string; courseCode: string; courseName: string; description: string; creditHours: number; prerequisites: string[]; semestersOffered: string[] }[]>([]);
+  const[takenClasses, setTakenClass] = useState<string[]>([]);
   useEffect(() => {
     let _ud: any = localStorage.getItem('user_data');
     if (_ud) 
@@ -13,34 +23,58 @@ function Dashboard()
 
       fetch(`https://yourucf.com/api/plans/user/${ud.id}`)
       .then((response) => response.json())
-      .then((data) => {
-        if (data.semesters) 
-        {
-          setSemesters(data.semesters);
-        } else
-        {
-          setMessage('No semesters found');
-        }
-      })
-      .catch((error) => {
-        setMessage('Error fetching semesters');
-      });
+        .then(async (data) => {
+          setTakenClass(data); 
+        })
+        .catch((error) => {
+          setMessage('Error fetching available courses');
+        });
+
+      fetch(`https://yourucf.com/api/plans/available/${ud.id}`)
+      .then((response) => response.json())
+        .then(async (data) => {
+          setAvailableClasses(data); 
+        })
+        .catch((error) => {
+          setMessage('Error fetching available courses');
+        });
+  
+      fetch(`https://yourucf.com/api/plans/user/${ud.id}`)
+        .then((response) => response.json())
+        .then(async (data) => {
+          if (data.semesters) 
+          {
+            console.log("Semester info: ", data.semesters);
+            const semestersWithCourses = await Promise.all(
+              data.semesters.map(async (semester: any) => ({
+                ...semester,
+                courses: await Promise.all(
+                  semester.courses.map(async (course: any) => {
+                    const courseId = typeof course.courseId === 'object' ? course.courseId._id : course.courseId;
+                    const courseName = await fetchCourseName(courseId); 
+                    return {
+                      courseId,
+                      courseName, 
+                      status: course.status,
+                      _id: course._id,
+                    };
+                  })
+                ),
+              }))
+            );
+            
+            setSemesters(semestersWithCourses);
+          } 
+          else 
+          {
+            setMessage('No semesters found');
+          }
+        })
+        .catch((error) => {
+          setMessage('Error fetching semesters');
+        });
     }
   }, []);
-
-  const [userId, setUserId] = useState<string>('');
-  const [message, setMessage] = useState('');
-  const [semesterName, setSemesterName] = useState('');
-  const [year, setYear] = useState('');
-  const [semesters, setSemesters] = useState<{ _id: string; semester: string; year: string }[]>([]); 
-  const [showAddSemesterForm, setShowAddSemesterForm] = useState(false);
-  const[searchValue, setSearchValue] = useState('');
-  const[searchMode, setSearchMode] = useState(2);
-
-  const addSemesterTile = () => 
-    {
-    setShowAddSemesterForm(true); 
-  };
 
   async function addSemester(e: any): Promise<void> 
   {
@@ -58,7 +92,6 @@ function Dashboard()
 
       if(!response.ok)//couldnt do addsemester
       {
-        console.log("Couldnt addSemester, checking the error.");
         let errText = await response.text();
         let errJson;
         try 
@@ -108,9 +141,41 @@ function Dashboard()
       
     let res = await response.json();
     console.log('Add Semester Response:', res);
-    setSemesters((prevSemesters) => [...prevSemesters, { _id: res._id, semester: semesterName, year: year }]);
+    setSemesters((prevSemesters) => [...prevSemesters, { _id: res._id, semester: semesterName, year: year, courses: res.courses ?? [] }]);
     setMessage(`${semesterName} has been added!`);
     setShowAddSemesterForm(false);
+    }
+    catch (error: any) 
+    {
+      setMessage(error.toString());
+    }
+  }
+
+const addCourse = async (semesterId: string, userId: string, courseId: string): Promise<any> => {
+    try 
+    {
+      console.log('SemesterId: ', semesterId);
+      console.log('CourseId', courseId);
+      let obj = {courseId: courseId};
+      let js = JSON.stringify(obj);
+
+      const response = await fetch(`https://yourucf.com/api/plans/${userId}/semesters/${semesterId}/courses`,
+        { method: 'POST', body: js, headers: { 'Content-Type': 'application/json' }
+  
+        });
+
+        if(!response.ok) 
+          {
+            let errText = await response.text();
+            let errJson = JSON.parse(errText);
+            setMessage(`Error: ${errJson.error}`);
+            return;
+          }
+          const res = await response.json();
+          console.log('API Response from addCourse', res);
+          setMessage('Course added successfully!!');
+          return res.semester; 
+     
     }
     catch (error: any) 
     {
@@ -210,7 +275,112 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
   {
     setSearchMode(Number(e.target.value));
   }
+  const handleDragStart = (event: React.DragEvent<HTMLDivElement>, course: any) => 
+  {
+    event.dataTransfer.setData('text/plain', JSON.stringify(course));
+  };
  
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => 
+  {
+    event.preventDefault();
+  }
+  const addSemesterTile = () => 
+    {
+    setShowAddSemesterForm(true); 
+  };
+
+  const handleDrop = async (event: React.DragEvent<HTMLDivElement>, semesterId: string) => {
+    event.preventDefault();
+    const courseData = event.dataTransfer.getData('text/plain');
+    const course = JSON.parse(courseData);
+  
+    console.log("Dropped Course:", course); 
+    console.log("Course ID during drop:", course._id); 
+
+    const prerequisites: string[] = await fetchprereq(course._id); // Make sure prerequisites are typed as string[]
+
+    // Check if all prerequisites are met
+    const notTaken = prerequisites.filter((prereq: string) => !takenClasses.includes(prereq));
+  
+
+
+    if(notTaken.length > 0)
+    {
+      setMessage(`Prerequisite not met:${notTaken.join(', ')}`);
+    }
+
+    
+    const updatedSemester = await addCourse(semesterId, userId, course._id);
+
+
+    if (updatedSemester && updatedSemester.courses) 
+    {
+
+      const coursesWithNames = await Promise.all(
+        updatedSemester.courses.map(async (course: any) => ({
+          ...course,
+          courseName: await fetchCourseName(course.courseId),
+        }))
+      );
+      
+      setSemesters((prevSemesters) =>
+        prevSemesters.map((semester) =>
+          semester._id === updatedSemester._id
+            ? { ...semester, courses: coursesWithNames }
+            : semester
+        )
+      );
+    }
+    setAvailableClasses((prevAvailableClasses => 
+      prevAvailableClasses.filter((availableCourse) => availableCourse._id !== course._id))
+    );
+  };          
+      
+
+  const fetchCourseName = async(courseId: string) =>
+  {
+    try
+    {
+
+      const response = await fetch(`https://yourucf.com/api/courses/${courseId}`);
+
+      if(!response.ok)
+        throw new Error('Failed to fetch course name');
+      
+      const data = await response.json();
+      
+      return data.courseName;
+    }
+    catch (error: any) 
+    {
+      setMessage(error.toString());
+      return `Course ID: ${courseId}`;
+    }
+
+  };
+
+  const fetchprereq = async(courseId: string) =>
+    {
+      try
+      {
+  
+        const response = await fetch(`https://yourucf.com/api/courses/${courseId}`);
+  
+        if(!response.ok)
+          throw new Error('Failed to fetch course name');
+        
+        const data = await response.json();
+        
+        return data.prerequisites;
+      }
+      catch (error: any) 
+      {
+        setMessage(error.toString());
+        return [];
+
+      }
+  
+    };
 
 
   return (
@@ -237,20 +407,45 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
         </div>
       )}
 
+        <div className="available-courses-container">
+          {availableClasses.length > 0 ? (
+            availableClasses.map((course) => (
+              <div
+                key={course._id}
+                className="available-course-item"
+                draggable
+                onDragStart={(event) => handleDragStart(event, course)}
+              >
+                {course.courseName}
+              </div>
+            ))
+          ) : (
+            <p>No available courses</p>
+          )}
+        </div>
+
       <div className="semester-container">
         {semesters.map((semester) => (
-            <div key={semester._id} className="semester-tile">
-            <div className="tile-labels">
-              {semester.semester} {semester.year}
-              <button className="delete-button" onClick={() => deleteSemester(semester._id, userId)}>Delete</button>  
+            <div key={semester._id} className="semester-tile" onDragOver={handleDragOver} onDrop={(event) => handleDrop(event, semester._id)} >
+              <div className="tile-labels">
+                {semester.semester} {semester.year}
+                <button className="delete-button" onClick={() => deleteSemester(semester._id, userId)}>Delete</button>  
+              </div>
+              <div className="drag-drop-area">
+                {semester.courses && semester.courses.length > 0 ? (
+                semester.courses.map((course, index) => (
+                  <div key={index} className="course-in-semester">
+                    {course.courseName || `Course ID: ${String(course.courseId?._id || course.courseId)}`}
+                  </div>
+                    ))
+                  ) : (
+                    <p>No courses added yet.</p>
+                  )}
             </div>
-            <div className="drag-drop-area"></div>
-      </div>
+        </div>
         ))}
       </div>
     </div>
   );
 }
-
 export default Dashboard;
-
