@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './Dashboard.css';
 
 function Dashboard() 
@@ -23,7 +23,8 @@ function Dashboard()
         }
       })
       .catch((error) => {
-        setMessage('Error fetching semesters');
+	console.error('Error fetching semesters:', error)
+        setMessage(`Error fetching semesters: ${error.message}`);
       });
     }
   }, []);
