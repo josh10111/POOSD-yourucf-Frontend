@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './Dashboard.css';
 
 function Dashboard() 
@@ -14,75 +14,83 @@ function Dashboard()
   const [availableClasses, setAvailableClasses] = useState<{ _id: string; courseCode: string; courseName: string; description: string; creditHours: number; prerequisites: string[]; semestersOffered: string[] }[]>([]);
   const[takenClasses, setTakenClass] = useState<string[]>([]);
   useEffect(() => {
-    let _ud: any = localStorage.getItem('user_data');
-    if (_ud) 
-    {
-      let ud = JSON.parse(_ud);
-      setUserId(ud.id);
-      console.log('Extracted userId:', ud.id);
-
-      fetch(`https://yourucf.com/api/plans/user/${ud.id}`)
-      .then((response) => response.json())
-        .then(async (data) => {
-          setTakenClass(data); 
-        })
-        .catch((error) => {
-          setMessage('Error fetching available courses');
-        });
-
-      fetch(`https://yourucf.com/api/plans/available/${ud.id}`)
-      .then((response) => response.json())
-        .then(async (data) => {
-          setAvailableClasses(data); 
-        })
-        .catch((error) => {
-          setMessage('Error fetching available courses');
-        });
+    const fetchData = async () => {
+      let _ud: any = localStorage.getItem('user_data');
+      if (_ud) {
+        let ud = JSON.parse(_ud);
+        setUserId(ud.id);
+        console.log('Extracted userId:', ud.id);
   
-      fetch(`https://yourucf.com/api/plans/user/${ud.id}`)
-        .then((response) => response.json())
-        .then(async (data) => {
-          if (data.semesters) 
+        try
+        {
+          const [plansResponse, availableResponse] = await Promise.all([
+            fetch(`https://yourucf.com/api/plans/user/${ud.id}`),
+            fetch(`https://yourucf.com/api/plans/available/${ud.id}`),
+          ]);
+  
+          if (!plansResponse.ok) 
+            {
+            throw new Error(`Failed to fetch plans: ${plansResponse.status}`);
+          }
+          if (!availableResponse.ok) 
+            {
+            throw new Error(`Failed to fetch available courses: ${availableResponse.status}`);
+          }
+  
+          const plansData = await plansResponse.json();
+          const availableData = await availableResponse.json();
+  
+          setAvailableClasses(availableData);
+  
+          if (plansData.semesters)
           {
-            console.log("Semester info: ", data.semesters);
+            console.log("Semester info: ", plansData.semesters);
             const semestersWithCourses = await Promise.all(
-              data.semesters.map(async (semester: any) => ({
+              plansData.semesters.map(async (semester: any) => ({
                 ...semester,
                 courses: await Promise.all(
                   semester.courses.map(async (course: any) => {
                     const courseId = typeof course.courseId === 'object' ? course.courseId._id : course.courseId;
-                    const courseName = await fetchCourseName(courseId); 
+                    const courseName = await fetchCourseName(courseId);
+                    const creditHours = await fetchCreditHours(courseId);
+                    const semestersProvided = await fetchSemestersProvided(courseId);
                     return {
                       courseId,
-                      courseName, 
+                      courseName,
                       status: course.status,
                       _id: course._id,
+                      creditHours: creditHours,
+                      semestersProvided: semestersProvided,
                     };
                   })
                 ),
               }))
             );
-            
+  
             setSemesters(semestersWithCourses);
           } 
           else 
           {
             setMessage('No semesters found');
           }
-        })
-        .catch((error) => {
-          setMessage('Error fetching semesters');
-        });
-    }
+        } 
+        catch (error: any) 
+        {
+          setMessage(`Error: ${error.message}`);
+        }
+      }
+    };
+  
+    fetchData();
   }, []);
+  
 
   async function addSemester(e: any): Promise<void> 
   {
     e.preventDefault();
 
-    let obj = { userId: userId, semesterName: semesterName, year: Number(year) };
+    let obj = { userId: userId, semesterName: semesterName.trim(), year: Number(year) };
     let js = JSON.stringify(obj);
-
     try 
     {
       const response = await fetch('https://yourucf.com/api/plans/addSemester',
@@ -90,14 +98,13 @@ function Dashboard()
 
         }});
 
-      if(!response.ok)//couldnt do addsemester
+      if(!response.ok)
       {
         let errText = await response.text();
         let errJson;
         try 
         {
           errJson = JSON.parse(errText);
-          console.log("Error from API:", errJson.error);
           
           if(errJson.error === "Plan of Study not found.")
           {
@@ -139,23 +146,22 @@ function Dashboard()
 
       }
       
-    let res = await response.json();
-    console.log('Add Semester Response:', res);
-    setSemesters((prevSemesters) => [...prevSemesters, { _id: res._id, semester: semesterName, year: year, courses: res.courses ?? [] }]);
-    setMessage(`${semesterName} has been added!`);
-    setShowAddSemesterForm(false);
+      let res = await response.json();
+      setSemesters((prevSemesters) => [...prevSemesters, { _id: res._id, semester: semesterName, year: year, courses: res.courses ?? [] }]);
+      setMessage(`${semesterName} has been added!`);
+      setShowAddSemesterForm(false);
+      }
+      catch (error: any) 
+      {
+        setMessage(error.toString());
+      }
     }
-    catch (error: any) 
-    {
-      setMessage(error.toString());
-    }
-  }
+
 
 const addCourse = async (semesterId: string, userId: string, courseId: string): Promise<any> => {
     try 
     {
-      console.log('SemesterId: ', semesterId);
-      console.log('CourseId', courseId);
+
       let obj = {courseId: courseId};
       let js = JSON.stringify(obj);
 
@@ -172,8 +178,12 @@ const addCourse = async (semesterId: string, userId: string, courseId: string): 
             return;
           }
           const res = await response.json();
-          console.log('API Response from addCourse', res);
           setMessage('Course added successfully!!');
+
+          setAvailableClasses((prevAvailableClasses) =>
+            prevAvailableClasses.filter((availableCourse) => availableCourse._id !== courseId)
+          );
+
           return res.semester; 
      
     }
@@ -183,8 +193,57 @@ const addCourse = async (semesterId: string, userId: string, courseId: string): 
     }
   }
 
-  async function deleteSemester(semesterId:string, userId:string): Promise<void> 
+  const deleteCourse = async (semesterId: string, userId: string, courseId: string): Promise<any> => {
+    try 
+    {
+     
+      const response = await fetch(`https://yourucf.com/api/plans/${userId}/semesters/${semesterId}/courses/${courseId}`,
+        { method: 'DELETE', headers: { 'Content-Type': 'application/json' }
+        });
+
+        if(!response.ok) 
+          {
+            let errText = await response.text();
+            let errJson = JSON.parse(errText);
+            setMessage(`Error: ${errJson.error}`);
+            return;
+          }
+          
+          const res = await response.json();
+          setMessage('Course removed successfully!!');
+
+          setAvailableClasses((prevAvailableClasses) =>
+            prevAvailableClasses.filter((availableCourse) => availableCourse._id !== courseId)
+          );
+          setSemesters(prevSemesters =>
+            prevSemesters.map(semester => {
+              if (semester._id === semesterId) 
+              {
+                const filteredCourses = semester.courses.filter(course => {
+                  return course.courseId !== courseId;
+                });
+          
+                return {
+                  ...semester,
+                  courses: filteredCourses
+                  
+                };
+              }
+              return semester;
+            })
+          );
+          return res.semester;
+          
+    }
+    catch (error: any) 
+    {
+      setMessage(error.toString());
+    }
+  }
+
+async function deleteSemester(semesterId:string, userId:string): Promise<void> 
   {
+   
   
     try 
     {
@@ -215,6 +274,8 @@ const addCourse = async (semesterId: string, userId: string, courseId: string): 
       setMessage(error.toString());
     }
   }
+
+ 
 async function searchSemester(searchValue:string, searchMode: number) : Promise<void>
 {
     
@@ -293,22 +354,18 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
     event.preventDefault();
     const courseData = event.dataTransfer.getData('text/plain');
     const course = JSON.parse(courseData);
-  
-    console.log("Dropped Course:", course); 
-    console.log("Course ID during drop:", course._id); 
 
-    const prerequisites: string[] = await fetchprereq(course._id); // Make sure prerequisites are typed as string[]
 
-    // Check if all prerequisites are met
+    const prerequisites: string[] = await fetchprereq(course._id); 
     const notTaken = prerequisites.filter((prereq: string) => !takenClasses.includes(prereq));
+
   
-
-
     if(notTaken.length > 0)
     {
-      setMessage(`Prerequisite not met:${notTaken.join(', ')}`);
+      const missingNames = await Promise.all(notTaken.map((prereqId) => fetchCourseName(prereqId)));
+      setMessage(`Prerequisite not met: ${missingNames.join(', ')}`);
+      return; 
     }
-
     
     const updatedSemester = await addCourse(semesterId, userId, course._id);
 
@@ -320,6 +377,8 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
         updatedSemester.courses.map(async (course: any) => ({
           ...course,
           courseName: await fetchCourseName(course.courseId),
+          creditHours: await fetchCreditHours(course.courseId),
+          semestersProvided: await fetchSemestersProvided(course.courseId)
         }))
       );
       
@@ -334,7 +393,7 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
     setAvailableClasses((prevAvailableClasses => 
       prevAvailableClasses.filter((availableCourse) => availableCourse._id !== course._id))
     );
-  };          
+  };           
       
 
   const fetchCourseName = async(courseId: string) =>
@@ -358,6 +417,27 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
     }
 
   };
+  const fetchSemestersProvided = async(courseId: string) =>
+    {
+      try
+      {
+  
+        const response = await fetch(`https://yourucf.com/api/courses/${courseId}`);
+  
+        if(!response.ok)
+          throw new Error('Failed to fetch course name');
+        
+        const data = await response.json();
+        
+        return data.semestersOffered;
+      }
+      catch (error: any) 
+      {
+        setMessage(error.toString());
+        return `Course ID: ${courseId}`;
+      }
+  
+    };
 
   const fetchprereq = async(courseId: string) =>
     {
@@ -381,7 +461,28 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
       }
   
     };
-
+  
+    const fetchCreditHours = async(courseId: string) =>
+      {
+        try
+        {
+    
+          const response = await fetch(`https://yourucf.com/api/courses/${courseId}`);
+    
+          if(!response.ok)
+            throw new Error('Failed to fetch course name');
+          
+          const data = await response.json();
+          
+          return data.creditHours;
+        }
+        catch (error: any) 
+        {
+          setMessage(error.toString());
+          return `Course ID: ${courseId}`;
+        }
+    
+      };
 
   return (
     <div className="dashboard-container">
@@ -433,10 +534,15 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
               </div>
               <div className="drag-drop-area">
                 {semester.courses && semester.courses.length > 0 ? (
-                semester.courses.map((course, index) => (
-                  <div key={index} className="course-in-semester">
-                    {course.courseName || `Course ID: ${String(course.courseId?._id || course.courseId)}`}
-                  </div>
+                semester.courses.map((course) => (
+                  <div key={course._id} className="course-in-semester">
+                    <span style={{ marginRight: '10px' }}>{course.courseName}</span> 
+                    <span>{course.creditHours} Hrs</span>
+                    <button
+                      className="delete-course-btn"
+                      onClick={() => deleteCourse(semester._id, userId, course.courseId)}>Delete Course
+                    </button>
+                </div>
                     ))
                   ) : (
                     <p>No courses added yet.</p>
