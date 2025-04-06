@@ -3,12 +3,16 @@ body
     height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;;
+    justify-content: flex-start;
+    align-items: flex-start;
     margin:0;
 }
 .dashboard-container
 { 
     text-align:left;  
+    width: 100%;
+    padding: 20px;
+
 }
 .semester-container 
 {
@@ -60,6 +64,7 @@ body
     border-radius: 5px;
 
 }
+
 .search-input,.search-dropdown,.Add-Semester-Button,.search-button
 {
     background-color: black;
@@ -76,3 +81,36 @@ body
     color:white;    
 }
 
+.available-courses-container {
+    position: absolute;
+    color:black;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 350px; 
+    padding: 20px;
+    background-color: #f4f4f4;
+    border-left: 2px solid #ddd; 
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1); 
+    font-size: 14px; 
+    overflow-y: auto; 
+    max-height: 80vh; 
+}
+.available-course-item {
+    padding: 10px;
+    margin: 5px 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    cursor: grab;
+    user-select: none;
+}
+
+.available-course-item:active {
+    cursor: grabbing;
+    opacity: 0.6;
+}
+
+.course-in-semester
+{
+    color:rgba(79,72,148,255);
+}
