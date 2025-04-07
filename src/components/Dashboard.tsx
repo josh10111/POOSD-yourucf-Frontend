@@ -13,6 +13,8 @@ function Dashboard()
   const[searchMode, setSearchMode] = useState(2);
   const [availableClasses, setAvailableClasses] = useState<{ _id: string; courseCode: string; courseName: string; description: string; creditHours: number; prerequisites: string[]; semestersOffered: string[] }[]>([]);
   const[takenClasses, setTakenClass] = useState<string[]>([]);
+  const[searchCourse, setSearchCourse] = useState('');
+
   useEffect(() => {
     const fetchData = async () => {
       let _ud: any = localStorage.getItem('user_data');
@@ -38,7 +40,7 @@ function Dashboard()
           const availableData = await availableResponse.json();
           
           console.log('Plans Data:', plansData);
-          //console.log('Available Data:', availableData); 
+          
   
           setAvailableClasses(availableData); 
   
@@ -334,6 +336,14 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
   {
     setSearchMode(Number(e.target.value));
   }
+
+  function handleSetSearchCourse(e:any): void
+  {
+    setSearchCourse(e.target.value);
+  }
+  const filteredAvailableClasses = availableClasses.filter((course) =>
+    course.courseName.toLowerCase().includes(searchCourse.toLowerCase()) || course.courseCode.toLowerCase().includes(searchCourse.toLowerCase())
+  );
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>, course: any) => 
   {
     event.dataTransfer.setData('text/plain', JSON.stringify(course));
@@ -363,6 +373,7 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
     }
     
     const updatedSemester = await addCourse(semesterId, userId, course._id);
+    setTakenClass((prev) => [...prev, course._id]);
 
     if (updatedSemester && updatedSemester.courses) 
     {
@@ -387,7 +398,7 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
     setAvailableClasses((prevAvailableClasses => 
       prevAvailableClasses.filter((availableCourse) => availableCourse._id !== course._id))
     );
-    console.log(availableClasses);
+   
     
   };           
       
@@ -478,8 +489,7 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
           return `Course ID: ${courseId}`;
         }
     
-      };
-
+      }; 
   return (
     <div className="dashboard-container">
       <h1>Welcome to your Dashboard!</h1>
@@ -505,15 +515,12 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
       )}
 
         <div className="available-courses-container">
-          {availableClasses.length > 0 ? (
-            availableClasses.map((course) => (
-              <div
-                key={course._id}
-                className="available-course-item"
-                draggable
-                onDragStart={(event) => handleDragStart(event, course)}
-              >
-                {course.courseName}
+        <input type="text"placeholder="Searh courses.." value={searchCourse}onChange={handleSetSearchCourse}className="search-bar"/>
+          {filteredAvailableClasses.length > 0 ? (
+            filteredAvailableClasses.map((course) => (
+              <div key={course._id} className="available-course-item" draggable onDragStart={(event) => handleDragStart(event, course)}>
+                <span style={{ marginRight: '10px' }}>{course.courseCode}</span> 
+                <span>{course.courseName}</span>
               </div>
             ))
           ) : (
@@ -542,7 +549,7 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
                     ))
                   ) : (
                     <p>No courses added yet.</p>
-                  )}
+                  )}                
             </div>
         </div>
         ))}

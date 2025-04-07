@@ -42,9 +42,10 @@ body
 .drag-drop-area 
 {
     padding: 50px; 
-    text-align: center;
+    text-align: left;
     background-color:white;
     flex-grow:1;
+
 }
 .tile-labels
 {
@@ -52,10 +53,11 @@ body
     display: flex;
     align-items: center;
     justify-content: space-between;
+    
 }
 
   
-.delete-button
+.delete-button, .delete-course-btn
 {
     background-color: rgb(76, 32, 138);
     color: white;
@@ -113,4 +115,8 @@ body
 .course-in-semester
 {
     color:rgba(79,72,148,255);
+    display: flex;
+    justify-content: space-between; 
+   
+
 }
