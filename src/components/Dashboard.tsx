@@ -153,6 +153,7 @@ function Dashboard()
       setSemesters((prevSemesters) => [...prevSemesters, { _id: res._id, semester: semesterName, year: year, courses: res.courses ?? [] }]);
       setMessage(`${semesterName} has been added!`);
       setShowAddSemesterForm(false);
+      window.location.reload();
       }
       catch (error: any) 
       {
@@ -303,14 +304,32 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
         {
           setMessage("No semesters found");
         }
-
-        const formattedSemesters = data.semesters.map((semester: any) => ({
-          _id: semester._id,
-          semester: semester.semester,
-          year: semester.year,
-        }));
-    
+        const formattedSemesters = await Promise.all(
+          data.semesters.map(async (semester: any) => ({
+            _id: semester._id,
+            semester: semester.semester,
+            year: semester.year,
+            courses: semester.courses
+              ? await Promise.all(
+                  semester.courses.map(async (course: any) => {
+                    const courseId = typeof course.courseId === 'object' ? course.courseId._id : course.courseId;
+                    const courseName = await fetchCourseName(courseId);
+                    const creditHours = await fetchCreditHours(courseId);
+                    return {
+                      courseId,
+                      courseName,
+                      status: course.status,
+                      _id: course._id,
+                      creditHours: creditHours,
+                    };
+                  })
+                )
+              : [],
+          }))
+        );
+      
         setSemesters(formattedSemesters);
+      
 
     } 
     catch (error: any) 
@@ -341,7 +360,17 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
   {
     setSearchCourse(e.target.value);
   }
-  const filteredAvailableClasses = availableClasses.filter((course) =>
+  function creditTotal(courses: any[]) : number
+  {
+    if(!courses || courses.length === 0)
+      return 0;
+
+    let x = courses.reduce((sum, course) => sum + course.creditHours, 0);
+    console.log("Credit Hours: ", x);
+    return x;
+
+  }
+  const filteredAvailableClasses = availableClasses.filter(course =>
     course.courseName.toLowerCase().includes(searchCourse.toLowerCase()) || course.courseCode.toLowerCase().includes(searchCourse.toLowerCase())
   );
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>, course: any) => 
@@ -469,7 +498,7 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
   
     };
   
-    const fetchCreditHours = async(courseId: string) =>
+  const fetchCreditHours = async(courseId: string) =>
       {
         try
         {
@@ -490,6 +519,13 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
         }
     
       }; 
+ const doLogout = () =>
+  {
+    
+    localStorage.removeItem("user_data")
+    window.location.href = '/';
+  };
+
   return (
     <div className="dashboard-container">
       <h1>Welcome to your Dashboard!</h1>
@@ -505,6 +541,9 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
 
       <button onClick={() => searchSemester(searchValue, searchMode)} className="search-button">Search</button>
 
+      <button onClick={doLogout} className="logout-button">Logout</button>
+
+      
       {message && <p className="message-box">{message}</p>}  
       {showAddSemesterForm && (
         <div className="semester-tiles">
@@ -533,6 +572,7 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
             <div key={semester._id} className="semester-tile" onDragOver={handleDragOver} onDrop={(event) => handleDrop(event, semester._id)} >
               <div className="tile-labels">
                 {semester.semester} {semester.year}
+                <p>Total Credit Hours: {creditTotal(semester.courses)}</p>
                 <button className="delete-button" onClick={() => deleteSemester(semester._id, userId)}>Delete</button>  
               </div>
               <div className="drag-drop-area">
@@ -541,11 +581,8 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
                   <div key={course._id} className="course-in-semester">
                     <span style={{ marginRight: '10px' }}>{course.courseName}</span> 
                     <span>{course.creditHours} Hrs</span>
-                    <button
-                      className="delete-course-btn"
-                      onClick={() => deleteCourse(semester._id, userId, course.courseId)}>Delete Course
-                    </button>
-                </div>
+                    <button className="delete-course-btn"onClick={() => deleteCourse(semester._id, userId, course.courseId)}>Delete Course </button>
+                  </div>
                     ))
                   ) : (
                     <p>No courses added yet.</p>
@@ -553,6 +590,7 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
             </div>
         </div>
         ))}
+        
       </div>
     </div>
   );
