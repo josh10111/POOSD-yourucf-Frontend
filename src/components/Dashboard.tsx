@@ -13,6 +13,8 @@ function Dashboard()
   const[searchMode, setSearchMode] = useState(2);
   const [availableClasses, setAvailableClasses] = useState<{ _id: string; courseCode: string; courseName: string; description: string; creditHours: number; prerequisites: string[]; semestersOffered: string[] }[]>([]);
   const[takenClasses, setTakenClass] = useState<string[]>([]);
+  const[searchCourse, setSearchCourse] = useState('');
+
   useEffect(() => {
     const fetchData = async () => {
       let _ud: any = localStorage.getItem('user_data');
@@ -21,36 +23,39 @@ function Dashboard()
         setUserId(ud.id);
         console.log('Extracted userId:', ud.id);
   
-        try
-        {
+        try {
           const [plansResponse, availableResponse] = await Promise.all([
             fetch(`https://yourucf.com/api/plans/user/${ud.id}`),
-            fetch(`https://yourucf.com/api/plans/available/${ud.id}`),
+            fetch(`https://yourucf.com/api/plans/available/${ud.id}`), 
           ]);
   
-          if (!plansResponse.ok) 
-            {
+          if (!plansResponse.ok) {
             throw new Error(`Failed to fetch plans: ${plansResponse.status}`);
           }
-          if (!availableResponse.ok) 
-            {
+          if (!availableResponse.ok) {
             throw new Error(`Failed to fetch available courses: ${availableResponse.status}`);
           }
   
           const plansData = await plansResponse.json();
           const availableData = await availableResponse.json();
+          
+          console.log('Plans Data:', plansData);
+          
   
-          setAvailableClasses(availableData);
+          setAvailableClasses(availableData); 
   
-          if (plansData.semesters)
-          {
+          const takenCourses: string[] = [];
+  
+          if (plansData.semesters) {
             console.log("Semester info: ", plansData.semesters);
+  
             const semestersWithCourses = await Promise.all(
               plansData.semesters.map(async (semester: any) => ({
                 ...semester,
                 courses: await Promise.all(
                   semester.courses.map(async (course: any) => {
                     const courseId = typeof course.courseId === 'object' ? course.courseId._id : course.courseId;
+                    takenCourses.push(courseId);
                     const courseName = await fetchCourseName(courseId);
                     const creditHours = await fetchCreditHours(courseId);
                     const semestersProvided = await fetchSemestersProvided(courseId);
@@ -68,14 +73,12 @@ function Dashboard()
             );
   
             setSemesters(semestersWithCourses);
-          } 
-          else 
-          {
+            setTakenClass(takenCourses);
+            console.log('Taken Classes:', takenCourses);
+          } else {
             setMessage('No semesters found');
           }
-        } 
-        catch (error: any) 
-        {
+        } catch (error: any) {
           setMessage(`Error: ${error.message}`);
         }
       }
@@ -179,11 +182,6 @@ const addCourse = async (semesterId: string, userId: string, courseId: string): 
           }
           const res = await response.json();
           setMessage('Course added successfully!!');
-
-          setAvailableClasses((prevAvailableClasses) =>
-            prevAvailableClasses.filter((availableCourse) => availableCourse._id !== courseId)
-          );
-
           return res.semester; 
      
     }
@@ -215,6 +213,7 @@ const addCourse = async (semesterId: string, userId: string, courseId: string): 
           setAvailableClasses((prevAvailableClasses) =>
             prevAvailableClasses.filter((availableCourse) => availableCourse._id !== courseId)
           );
+          
           setSemesters(prevSemesters =>
             prevSemesters.map(semester => {
               if (semester._id === semesterId) 
@@ -222,6 +221,7 @@ const addCourse = async (semesterId: string, userId: string, courseId: string): 
                 const filteredCourses = semester.courses.filter(course => {
                   return course.courseId !== courseId;
                 });
+
           
                 return {
                   ...semester,
@@ -336,6 +336,14 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
   {
     setSearchMode(Number(e.target.value));
   }
+
+  function handleSetSearchCourse(e:any): void
+  {
+    setSearchCourse(e.target.value);
+  }
+  const filteredAvailableClasses = availableClasses.filter((course) =>
+    course.courseName.toLowerCase().includes(searchCourse.toLowerCase()) || course.courseCode.toLowerCase().includes(searchCourse.toLowerCase())
+  );
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>, course: any) => 
   {
     event.dataTransfer.setData('text/plain', JSON.stringify(course));
@@ -354,11 +362,8 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
     event.preventDefault();
     const courseData = event.dataTransfer.getData('text/plain');
     const course = JSON.parse(courseData);
-
-
     const prerequisites: string[] = await fetchprereq(course._id); 
     const notTaken = prerequisites.filter((prereq: string) => !takenClasses.includes(prereq));
-
   
     if(notTaken.length > 0)
     {
@@ -368,7 +373,7 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
     }
     
     const updatedSemester = await addCourse(semesterId, userId, course._id);
-
+    setTakenClass((prev) => [...prev, course._id]);
 
     if (updatedSemester && updatedSemester.courses) 
     {
@@ -393,6 +398,8 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
     setAvailableClasses((prevAvailableClasses => 
       prevAvailableClasses.filter((availableCourse) => availableCourse._id !== course._id))
     );
+   
+    
   };           
       
 
@@ -482,8 +489,7 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
           return `Course ID: ${courseId}`;
         }
     
-      };
-
+      }; 
   return (
     <div className="dashboard-container">
       <h1>Welcome to your Dashboard!</h1>
@@ -509,15 +515,12 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
       )}
 
         <div className="available-courses-container">
-          {availableClasses.length > 0 ? (
-            availableClasses.map((course) => (
-              <div
-                key={course._id}
-                className="available-course-item"
-                draggable
-                onDragStart={(event) => handleDragStart(event, course)}
-              >
-                {course.courseName}
+        <input type="text"placeholder="Searh courses.." value={searchCourse}onChange={handleSetSearchCourse}className="search-bar"/>
+          {filteredAvailableClasses.length > 0 ? (
+            filteredAvailableClasses.map((course) => (
+              <div key={course._id} className="available-course-item" draggable onDragStart={(event) => handleDragStart(event, course)}>
+                <span style={{ marginRight: '10px' }}>{course.courseCode}</span> 
+                <span>{course.courseName}</span>
               </div>
             ))
           ) : (
@@ -546,7 +549,7 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
                     ))
                   ) : (
                     <p>No courses added yet.</p>
-                  )}
+                  )}                
             </div>
         </div>
         ))}
