@@ -67,7 +67,7 @@ body
 
 }
 
-.search-input,.search-dropdown,.Add-Semester-Button,.search-button
+.search-input,.search-dropdown,.Add-Semester-Button,.search-button, .logout-button
 {
     background-color: black;
     color: white;
