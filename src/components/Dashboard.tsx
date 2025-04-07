@@ -21,36 +21,39 @@ function Dashboard()
         setUserId(ud.id);
         console.log('Extracted userId:', ud.id);
   
-        try
-        {
+        try {
           const [plansResponse, availableResponse] = await Promise.all([
             fetch(`https://yourucf.com/api/plans/user/${ud.id}`),
-            fetch(`https://yourucf.com/api/plans/available/${ud.id}`),
+            fetch(`https://yourucf.com/api/plans/available/${ud.id}`), 
           ]);
   
-          if (!plansResponse.ok) 
-            {
+          if (!plansResponse.ok) {
             throw new Error(`Failed to fetch plans: ${plansResponse.status}`);
           }
-          if (!availableResponse.ok) 
-            {
+          if (!availableResponse.ok) {
             throw new Error(`Failed to fetch available courses: ${availableResponse.status}`);
           }
   
           const plansData = await plansResponse.json();
           const availableData = await availableResponse.json();
+          
+          console.log('Plans Data:', plansData);
+          //console.log('Available Data:', availableData); 
   
-          setAvailableClasses(availableData);
+          setAvailableClasses(availableData); 
   
-          if (plansData.semesters)
-          {
+          const takenCourses: string[] = [];
+  
+          if (plansData.semesters) {
             console.log("Semester info: ", plansData.semesters);
+  
             const semestersWithCourses = await Promise.all(
               plansData.semesters.map(async (semester: any) => ({
                 ...semester,
                 courses: await Promise.all(
                   semester.courses.map(async (course: any) => {
                     const courseId = typeof course.courseId === 'object' ? course.courseId._id : course.courseId;
+                    takenCourses.push(courseId);
                     const courseName = await fetchCourseName(courseId);
                     const creditHours = await fetchCreditHours(courseId);
                     const semestersProvided = await fetchSemestersProvided(courseId);
@@ -68,14 +71,12 @@ function Dashboard()
             );
   
             setSemesters(semestersWithCourses);
-          } 
-          else 
-          {
+            setTakenClass(takenCourses);
+            console.log('Taken Classes:', takenCourses);
+          } else {
             setMessage('No semesters found');
           }
-        } 
-        catch (error: any) 
-        {
+        } catch (error: any) {
           setMessage(`Error: ${error.message}`);
         }
       }
@@ -179,11 +180,6 @@ const addCourse = async (semesterId: string, userId: string, courseId: string): 
           }
           const res = await response.json();
           setMessage('Course added successfully!!');
-
-          setAvailableClasses((prevAvailableClasses) =>
-            prevAvailableClasses.filter((availableCourse) => availableCourse._id !== courseId)
-          );
-
           return res.semester; 
      
     }
@@ -215,6 +211,7 @@ const addCourse = async (semesterId: string, userId: string, courseId: string): 
           setAvailableClasses((prevAvailableClasses) =>
             prevAvailableClasses.filter((availableCourse) => availableCourse._id !== courseId)
           );
+          
           setSemesters(prevSemesters =>
             prevSemesters.map(semester => {
               if (semester._id === semesterId) 
@@ -222,6 +219,7 @@ const addCourse = async (semesterId: string, userId: string, courseId: string): 
                 const filteredCourses = semester.courses.filter(course => {
                   return course.courseId !== courseId;
                 });
+
           
                 return {
                   ...semester,
@@ -354,11 +352,8 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
     event.preventDefault();
     const courseData = event.dataTransfer.getData('text/plain');
     const course = JSON.parse(courseData);
-
-
     const prerequisites: string[] = await fetchprereq(course._id); 
     const notTaken = prerequisites.filter((prereq: string) => !takenClasses.includes(prereq));
-
   
     if(notTaken.length > 0)
     {
@@ -368,7 +363,6 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
     }
     
     const updatedSemester = await addCourse(semesterId, userId, course._id);
-
 
     if (updatedSemester && updatedSemester.courses) 
     {
@@ -393,6 +387,8 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
     setAvailableClasses((prevAvailableClasses => 
       prevAvailableClasses.filter((availableCourse) => availableCourse._id !== course._id))
     );
+    console.log(availableClasses);
+    
   };           
       
 
