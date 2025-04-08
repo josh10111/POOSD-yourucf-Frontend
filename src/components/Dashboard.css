@@ -1,13 +1,4 @@
-#root{
-    margin: 0;
-    padding: 0;
-    width: 100%;
-}
 
-body {
-    justify-content: left;
-    margin: 0;
-}
 .navbar {
     font-weight: 500;
     color: #fff;
