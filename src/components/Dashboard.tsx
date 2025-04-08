@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import './Dashboard.css';
-import ucfLogo from '../assets/ucf-logo.png';
+import ucfLogoWebp from '../assets/constellationPegasus.webp';
 
 function Dashboard() 
 {
@@ -132,7 +132,7 @@ function Dashboard()
           }
           else
           {
-            setMessage("API Error: " + errJson.error);
+            setMessage("" + errJson.error);
             return;
           }
             
@@ -546,7 +546,10 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
   return (
     <div className='application'>
       <div className='navbar'>
-        <img src={ucfLogo} alt='ucf constellation logo' className='logo'/>
+        <div className="logo-area">
+        <img src={ucfLogoWebp} alt='ucf constellation logo' className='logo'/>
+        <h1>yourUCF</h1>
+        </div>
         <ul>
           <li><a href="https://www.cs.ucf.edu/wp-content/uploads/2024/09/CSIT-Elective-List-AY2024-2025.pdf" target="_blank" rel="noopener noreferrer">Electives List</a></li>
           <li><a href="https://www.cs.ucf.edu/wp-content/uploads/2024/04/CS-2024-2025-Course-Flowchart.pdf" target="_blank" rel="noopener noreferrer">CS Flowchart</a></li>
@@ -595,10 +598,10 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
               <div className="semester-tiles">
                 <div className='search-container'>
                   <div className='inputBox1'> 
-                    <input type="text"placeholder="Semester Name" value={semesterName}onChange={handleSetSemesterName}required/>
+                    <input type="text"placeholder="Semester Name" className="search-input" value={semesterName}onChange={handleSetSemesterName}required/>
                   </div>
                   <div className='inputBox1'> 
-                    <input type="text"placeholder="Year" value={year}onChange={handleSetYear}required/>
+                    <input type="text"placeholder="Year" className="search-input" value={year}onChange={handleSetYear}required/>
                   </div>
                 
                   <button onClick={addSemester} className='semester-add-button'>Done</button>

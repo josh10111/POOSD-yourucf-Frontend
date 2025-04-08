@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { jwtDecode } from "jwt-decode";
 import '../Login.css';
-import ucfLogo from '../assets/ucf-logo.png';
+import ucfLogoWebp from '../assets/constellationPegasus.webp';
 
 function Login() {
   const [message, setMessage] = useState('');
@@ -237,7 +237,8 @@ function Login() {
   };
 
   return (
-    <div className="container">
+    <div className='fake-body'>
+<div className="container">
       {(() => {
         if (isLogin) {
           return (
@@ -343,12 +344,13 @@ function Login() {
 
       <div className="toggle-box">
         <div className="panel">
-          <img src={ucfLogo} alt="UCF constellation logo"></img>
+          <img src={ucfLogoWebp} alt="UCF constellation logo"></img>
           <h1>yourUCF</h1>
-          <h3>Chart your UCF path to</h3>
-          <h2>graduation</h2>
+          <h2>Chart your UCF path to</h2>
+          <h3>graduation</h3>
         </div>
       </div>
+    </div>
     </div>
   );
 }

@@ -9,6 +9,7 @@
 
 body {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
@@ -16,6 +17,13 @@ body {
     background-position: center center;
     background-size: cover;
     background-attachment: fixed;
+}
+
+.fake-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .container {
@@ -94,13 +102,13 @@ form {
     border: none;
     outline: none;
     font-size: 16px;
-    color: #888;
+    color: #1f1f1f;
     font-weight: 600;
 }
 
 .inputBox input::placeholder {
-    color: #888;
-    font-weight: 500;
+    color: #1f1f1f;
+    font-weight: 600;
 }
 
 .inputBox i {
@@ -109,7 +117,7 @@ form {
     top: 50%;
     transform: translateY(-50%);
     font-size: 20px;
-    color:#888;
+    color: #1f1f1f;
 }
 
 .inputBox.error input::placeholder{
@@ -145,7 +153,7 @@ form {
     cursor: pointer;
     font-size: 16px;
     font-weight: 600;
-    color: #fff;
+    color: #1f1f1f;
     transition: background-color 0.3s ease, transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;;
 
 }
@@ -154,35 +162,41 @@ form {
     background-color: #5043c0; 
     transform: translateY(-1px); 
     box-shadow: 0 5px 7px rgba(0, 0, 0, 0.3); 
+    color: #fff;
 }
 
 #loginButton:active {
     background-color: #5043c0; 
     transform: translateY(1px); 
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); 
+    color: #fff;
 }
 #registerButton:hover {
     background-color: #5043c0; 
     transform: translateY(-1px); 
-    box-shadow: 0 5px 7px rgba(0, 0, 0, 0.3); 
+    box-shadow: 0 5px 7px rgba(0, 0, 0, 0.3);
+    color: #fff; 
 }
 
 #registerButton:active {
     background-color: #5043c0; 
     transform: translateY(1px); 
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); 
+    color: #fff;
 }
 
 #button:hover {
     background-color: #5043c0; 
     transform: translateY(-1px); 
     box-shadow: 0 5px 7px rgba(0, 0, 0, 0.3); 
+    color: #fff;
 }
 
 #button:active {
     background-color: #5043c0; 
     transform: translateY(1px); 
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); 
+    color: #fff;
 }
 
 
@@ -300,13 +314,13 @@ form {
 }
 
 .panel h2 {
-    font-size: 36px;
-    font-weight: 600;
+    color: #fff;
+    font-weight: 400;
 }
 
 .panel h3 {
-    color: #fff;
-    font-weight: 400;
+    font-size: 36px;
+    font-weight: 600;
 }
 
 .verification-box i{
