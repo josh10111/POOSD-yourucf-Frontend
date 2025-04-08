@@ -5,6 +5,7 @@ import ucfLogo from '../assets/ucf-logo.png';
 function Verify()
 {
     return(
+        <div className='fake-body'>
         <div className="container">
             <div className="form-box login"> 
                 <div className="verification-box">
@@ -26,6 +27,7 @@ function Verify()
                 </div>
 
             </div>
+        </div>
         </div>
     );
 };

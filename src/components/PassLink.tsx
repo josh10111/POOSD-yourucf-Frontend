@@ -41,6 +41,7 @@ function PassLink()
     }
 
     return(
+        <div className='fake-body'>
         <div className="container">
         <div className="form-box login"> 
             <form onSubmit={handleSubmit} >
@@ -85,6 +86,7 @@ function PassLink()
             </div>
 
         </div>
+    </div>
     </div>
     );
 };

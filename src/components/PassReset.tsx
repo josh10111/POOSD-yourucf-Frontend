@@ -138,6 +138,7 @@ interface PasswordRequirementsProps {
     }
 
     return(
+        <div className='fake-body'>
         <div className="container">
             <div className="form-box login"> 
                 <form onSubmit={handleResetPassword}>
@@ -198,6 +199,7 @@ interface PasswordRequirementsProps {
                     <h2>graduation</h2>
                 </div>
             </div>
+        </div>
         </div>
     );
 }
