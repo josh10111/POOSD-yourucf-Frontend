@@ -56,6 +56,7 @@ function Dashboard()
                     const courseName = await fetchCourseName(courseId);
                     const creditHours = await fetchCreditHours(courseId);
                     const semestersProvided = await fetchSemestersProvided(courseId);
+                    const courseCode = await fetchCourseCode(courseId);
                     return {
                       courseId,
                       courseName,
@@ -63,6 +64,7 @@ function Dashboard()
                       _id: course._id,
                       creditHours: creditHours,
                       semestersProvided: semestersProvided,
+                      courseCode: courseCode
                     };
                   })
                 ),
@@ -304,12 +306,14 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
                     const courseId = typeof course.courseId === 'object' ? course.courseId._id : course.courseId;
                     const courseName = await fetchCourseName(courseId);
                     const creditHours = await fetchCreditHours(courseId);
+                    const courseCode = await fetchCourseCode(courseId);
                     return {
                       courseId,
                       courseName,
                       status: course.status,
                       _id: course._id,
                       creditHours: creditHours,
+                      courseCode: courseCode
                     };
                   })
                 )
@@ -402,7 +406,8 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
           ...course,
           courseName: await fetchCourseName(course.courseId),
           creditHours: await fetchCreditHours(course.courseId),
-          semestersProvided: await fetchSemestersProvided(course.courseId)
+          semestersProvided: await fetchSemestersProvided(course.courseId),
+          courseCode: await fetchCourseCode(course.courseId)
         }))
       );
       
@@ -485,6 +490,28 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
       }
   
     };
+
+  const fetchCourseCode = async(courseId: string) =>
+    {
+      try
+      {
+
+        const response = await fetch(`https://yourucf.com/api/courses/${courseId}`);
+
+        if(!response.ok)
+          throw new Error('Failed to fetch course name');
+
+        const data = await response.json();
+
+        return data.courseCode;
+      }
+      catch (error: any) 
+      {
+      setMessage(error.toString());
+        return `Course ID: ${courseId}`;
+      }
+
+    };
   
   const fetchCreditHours = async(courseId: string) =>
       {
@@ -507,6 +534,7 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
         }
     
       }; 
+      
  const doLogout = () =>
   {
     
@@ -563,20 +591,26 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
               </div>
 
             </div>
+            {showAddSemesterForm && (
+              <div className="semester-tiles">
+                <div className='search-container'>
+                  <div className='inputBox1'> 
+                    <input type="text"placeholder="Semester Name" value={semesterName}onChange={handleSetSemesterName}required/>
+                  </div>
+                  <div className='inputBox1'> 
+                    <input type="text"placeholder="Year" value={year}onChange={handleSetYear}required/>
+                  </div>
+                
+                  <button onClick={addSemester} className='semester-add-button'>Done</button>
+                </div>
+              </div>
+            )}
             <div className='message-container'>
               <div className='message-container-child'>
                 {message && <p className="message-box">{message}</p>}  
               </div>
               
             </div>
-            {showAddSemesterForm && (
-              <div className="semester-tiles">
-                <input type="text"placeholder="Semester Name" value={semesterName}onChange={handleSetSemesterName}required/>
-                <input type="text"placeholder="Year" value={year}onChange={handleSetYear}required/>
-                <button onClick={addSemester}>Done</button>
-              </div>
-            )}
-
             <div className="semester-container">
               {semesters.map((semester) => (
                   <div key={semester._id} className="semester-tile" onDragOver={handleDragOver} onDrop={(event) => handleDrop(event, semester._id)} >
@@ -589,7 +623,7 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
                       {semester.courses && semester.courses.length > 0 ? (
                       semester.courses.map((course) => (
                         <div key={course._id} className="course-in-semester">
-                          <div className="crn">COP 4510c</div>
+                          <div className="crn">{course.courseCode}</div>
                           <div className="course-name"><span style={{ marginRight: '10px' }}>{course.courseName}</span> </div>
                           <div className="credits"><span>{course.creditHours} Cr</span></div>
                           <div className="delete-course-btn-container"><button className="delete-course-btn"onClick={() => deleteCourse(semester._id, userId, course.courseId)}><i className='bx bxs-trash-alt'></i></button></div>
