@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import './Dashboard.css';
 import ucfLogoWebp from '../assets/constellationPegasus.webp';
+import easterEgg from '../assets/leinecker.webp';
 
 function Dashboard() 
 {
@@ -534,7 +535,8 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
         }
     
       }; 
-      
+  
+
  const doLogout = () =>
   {
     
@@ -542,12 +544,17 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
     window.location.href = '/';
   };
 
+  const [isUcfLogo, setIsUcfLogo] = useState(true);
+
+  const handleImageClick = () => {
+    setIsUcfLogo(!isUcfLogo);
+  };
 
   return (
     <div className='application'>
       <div className='navbar'>
         <div className="logo-area">
-        <img src={ucfLogoWebp} alt='ucf constellation logo' className='logo'/>
+        <img src={isUcfLogo ? ucfLogoWebp : easterEgg} alt={isUcfLogo ? 'UCF Logo' : 'Easter Egg'}className='logo' onClick={handleImageClick} style={{ cursor: 'pointer' }}/>
         <h1>yourUCF</h1>
         </div>
         <ul>
