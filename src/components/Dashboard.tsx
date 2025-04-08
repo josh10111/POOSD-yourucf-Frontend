@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import './Dashboard.css';
+import ucfLogo from '../assets/ucf-logo.png';
 
 function Dashboard() 
 {
@@ -513,72 +514,121 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
     window.location.href = '/';
   };
 
+
   return (
-    <div className="dashboard-container">
-      <h1>Welcome to your Dashboard!</h1>
+    <div className='application'>
+      <div className='navbar'>
+        <img src={ucfLogo} alt='ucf constellation logo' className='logo'/>
+        <ul>
+          <li><a href="https://www.cs.ucf.edu/wp-content/uploads/2024/09/CSIT-Elective-List-AY2024-2025.pdf" target="_blank" rel="noopener noreferrer">Electives List</a></li>
+          <li><a href="https://www.cs.ucf.edu/wp-content/uploads/2024/04/CS-2024-2025-Course-Flowchart.pdf" target="_blank" rel="noopener noreferrer">CS Flowchart</a></li>
+          <li><a href="https://my.ucf.edu/" target="_blank" rel="noopener noreferrer">myUCF</a></li>
+          <li><a href="https://webcourses.ucf.edu/" target="_blank" rel="noopener noreferrer">webcourses</a></li>
+          <li><a href="https://www.ucf.edu/" target="_blank" rel="noopener noreferrer">UCF</a></li>
+          <li onClick={doLogout}>Logout</li>
+        </ul>
+      </div>
 
-      <button onClick={addSemesterTile} className="Add-Semester-Button">Add Semester </button>
-
-      <input type="text"placeholder="Search semesters.."value={searchValue}onChange={handleSetSearchValue}className="search-input" />
-      <select value={searchMode} onChange={handleSetSearchMode}className="search-dropdown" >
-        <option value={0}>Search by Name</option>
-        <option value={1}>Search by Year</option>
-        <option value={2}>Search by Name & Year</option>
-      </select>
-
-      <button onClick={() => searchSemester(searchValue, searchMode)} className="search-button">Search</button>
-
-      <button onClick={doLogout} className="logout-button">Logout</button>
-
-      
-      {message && <p className="message-box">{message}</p>}  
-      {showAddSemesterForm && (
-        <div className="semester-tiles">
-          <input type="text"placeholder="Semester Name" value={semesterName}onChange={handleSetSemesterName}required/>
-          <input type="text"placeholder="Year" value={year}onChange={handleSetYear}required/>
-          <button onClick={addSemester}>Done</button>
-        </div>
-      )}
-
-        <div className="available-courses-container">
-        <input type="text"placeholder="Searh courses.." value={searchCourse}onChange={handleSetSearchCourse}className="search-bar"/>
-          {filteredAvailableClasses.length > 0 ? (
-            filteredAvailableClasses.map((course) => (
-              <div key={course._id} className="available-course-item" draggable onDragStart={(event) => handleDragStart(event, course)}>
-                <span style={{ marginRight: '10px' }}>{course.courseCode}</span> 
-                <span>{course.name}</span>
-              </div>
-            ))
-          ) : (
-            <p>No available courses</p>
-          )}
-        </div>
-      <div className="semester-container">
-        {semesters.map((semester) => (
-            <div key={semester._id} className="semester-tile" onDragOver={handleDragOver} onDrop={(event) => handleDrop(event, semester._id)} >
-              <div className="tile-labels">
-                {semester.semester} {semester.year}
-                <p>Total Credit Hours: {creditTotal(semester.courses)}</p>
-                <button className="delete-button" onClick={() => deleteSemester(semester._id, userId)}>Delete</button>  
-              </div>
-              <div className="drag-drop-area">
-                {semester.courses && semester.courses.length > 0 ? (
-                semester.courses.map((course) => (
-                  <div key={course._id} className="course-in-semester">
-                    <span style={{ marginRight: '10px' }}>{course.courseName}</span> 
-                    <span>{course.creditHours} Hrs</span>
-                    <button className="delete-course-btn"onClick={() => deleteCourse(semester._id, userId, course.courseId)}>Delete Course </button>
-                  </div>
-                    ))
-                  ) : (
-                    <p>No courses added yet.</p>
-                  )}                
+      <div className='main-content'>
+        <div className='dashboard-container'>
+          <div className='title-container'>
+            <div className='title'>
+              <h1>Dashboard</h1>
             </div>
+          </div>
+
+          <div className='interactive'>
+
+            <div className='search-field'>
+
+              <div className='add-semester-container'>
+                <button onClick={addSemesterTile} className="Add-Semester-Button">Add Semester </button>
+              </div>
+
+              <div className='search-container'>
+                <div className='inputBox1'>
+                  <input type="text"placeholder="Search semesters..."value={searchValue}onChange={handleSetSearchValue}className="search-input" />
+                </div>
+
+                <div className='inputBox1'>
+                  <select value={searchMode} onChange={handleSetSearchMode}className="search-dropdown" >
+                    <option value={0}>Name</option>
+                    <option value={1}>Year</option>
+                    <option value={2}>Name & Year</option>
+                  </select>
+                </div>
+                
+
+                <button onClick={() => searchSemester(searchValue, searchMode)} className="search-button">Search</button>
+              </div>
+
+            </div>
+            <div className='message-container'>
+              <div className='message-container-child'>
+                {message && <p className="message-box">{message}</p>}  
+              </div>
+              
+            </div>
+            {showAddSemesterForm && (
+              <div className="semester-tiles">
+                <input type="text"placeholder="Semester Name" value={semesterName}onChange={handleSetSemesterName}required/>
+                <input type="text"placeholder="Year" value={year}onChange={handleSetYear}required/>
+                <button onClick={addSemester}>Done</button>
+              </div>
+            )}
+
+            <div className="semester-container">
+              {semesters.map((semester) => (
+                  <div key={semester._id} className="semester-tile" onDragOver={handleDragOver} onDrop={(event) => handleDrop(event, semester._id)} >
+                    <div className="tile-labels">
+                      {semester.semester} {semester.year}
+                      <p>Total Credit Hours: {creditTotal(semester.courses)}</p>
+                      <button className="delete-button" onClick={() => deleteSemester(semester._id, userId)}><i className='bx bxs-trash-alt'></i></button>  
+                    </div>
+                    <div className="drag-drop-area">
+                      {semester.courses && semester.courses.length > 0 ? (
+                      semester.courses.map((course) => (
+                        <div key={course._id} className="course-in-semester">
+                          <div className="crn">COP 4510c</div>
+                          <div className="course-name"><span style={{ marginRight: '10px' }}>{course.courseName}</span> </div>
+                          <div className="credits"><span>{course.creditHours} Cr</span></div>
+                          <div className="delete-course-btn-container"><button className="delete-course-btn"onClick={() => deleteCourse(semester._id, userId, course.courseId)}><i className='bx bxs-trash-alt'></i></button></div>
+                          
+                        </div>
+                          ))
+                        ) : (
+                          <p>No courses added yet.</p>
+                        )}                
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-        ))}
-        
+        <div className="available-courses-container">
+          <div className="available-title">
+            <span>Available Courses</span>
+          </div>
+          <div className='available-search-container'>
+            <input type="text"placeholder="Search Courses..." value={searchCourse}onChange={handleSetSearchCourse}className="search-bar"/>
+          </div>
+          <div className='results'>
+            {filteredAvailableClasses.length > 0 ? (
+                filteredAvailableClasses.map((course) => (
+                  <div key={course._id} className="available-course-item" draggable onDragStart={(event) => handleDragStart(event, course)}>
+                    <span style={{ marginRight: '10px' }}>{course.courseCode}</span> 
+                    <span>{course.name}</span>
+                  </div>
+                ))
+              ) : (
+                <p>No available courses</p>
+              )}
+          </div>
+              
+          </div>
       </div>
     </div>
+    
   );
 }
 export default Dashboard;
