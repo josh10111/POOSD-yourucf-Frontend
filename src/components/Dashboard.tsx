@@ -11,7 +11,7 @@ function Dashboard()
   const [showAddSemesterForm, setShowAddSemesterForm] = useState(false);
   const[searchValue, setSearchValue] = useState('');
   const[searchMode, setSearchMode] = useState(2);
-  const [availableClasses, setAvailableClasses] = useState<{ _id: string; courseCode: string; courseName: string; description: string; creditHours: number; prerequisites: string[]; semestersOffered: string[] }[]>([]);
+  const [availableClasses, setAvailableClasses] = useState<any[]>([]);
   const[takenClasses, setTakenClass] = useState<string[]>([]);
   const[searchCourse, setSearchCourse] = useState('');
 
@@ -38,16 +38,12 @@ function Dashboard()
   
           const plansData = await plansResponse.json();
           const availableData = await availableResponse.json();
-          
-          console.log('Plans Data:', plansData);
-          
-  
-          setAvailableClasses(availableData); 
-  
+          setAvailableClasses(availableData);
           const takenCourses: string[] = [];
   
-          if (plansData.semesters) {
-            console.log("Semester info: ", plansData.semesters);
+          if (plansData.semesters) 
+          {
+            
   
             const semestersWithCourses = await Promise.all(
               plansData.semesters.map(async (semester: any) => ({
@@ -74,7 +70,6 @@ function Dashboard()
   
             setSemesters(semestersWithCourses);
             setTakenClass(takenCourses);
-            console.log('Taken Classes:', takenCourses);
           } else {
             setMessage('No semesters found');
           }
@@ -87,7 +82,7 @@ function Dashboard()
     fetchData();
   }, []);
   
-
+ 
   async function addSemester(e: any): Promise<void> 
   {
     e.preventDefault();
@@ -111,7 +106,6 @@ function Dashboard()
           
           if(errJson.error === "Plan of Study not found.")
           {
-            console.log("Plan of study not found, making one..");
             let createObj = {studentId: userId, semesters: [], totalCredits: -1};
             let createJs = JSON.stringify(createObj);
           
@@ -127,7 +121,6 @@ function Dashboard()
               }
               else
               {
-                console.log("Error creating Plan of study");
                 let createerr = await createResponse.text();
                 console.log("Create API Response:", createerr);
                 setMessage("Error: Failed to make POS");
@@ -152,8 +145,8 @@ function Dashboard()
       let res = await response.json();
       setSemesters((prevSemesters) => [...prevSemesters, { _id: res._id, semester: semesterName, year: year, courses: res.courses ?? [] }]);
       setMessage(`${semesterName} has been added!`);
-      setShowAddSemesterForm(false);
       window.location.reload();
+      setShowAddSemesterForm(false);
       }
       catch (error: any) 
       {
@@ -244,8 +237,6 @@ const addCourse = async (semesterId: string, userId: string, courseId: string): 
 
 async function deleteSemester(semesterId:string, userId:string): Promise<void> 
   {
-   
-  
     try 
     {
       if (!semesterId) {
@@ -283,7 +274,6 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
     
     let obj = {userId:userId,search:searchValue, mode:searchMode};
     let js = JSON.stringify(obj);
-    console.log("Sending request:", obj);
     try
     {
         const response = await fetch('https://yourucf.com/api/plans/searchSemester',
@@ -298,8 +288,6 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
         }
        
         let data = await response.json();
-       
-        console.log("Search Resuluts: ", data.semesters);
         if(!data.semesters)
         {
           setMessage("No semesters found");
@@ -337,7 +325,6 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
         setMessage(error.toString());
     }
 };
-  
 
   function handleSetSemesterName(e: any): void 
   {
@@ -363,15 +350,17 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
   function creditTotal(courses: any[]) : number
   {
     if(!courses || courses.length === 0)
+    {
       return 0;
+    }
+    
+    return courses.reduce((sum, course) => sum + course.creditHours, 0);
 
-    let x = courses.reduce((sum, course) => sum + course.creditHours, 0);
-    console.log("Credit Hours: ", x);
-    return x;
+   
 
   }
   const filteredAvailableClasses = availableClasses.filter(course =>
-    course.courseName.toLowerCase().includes(searchCourse.toLowerCase()) || course.courseCode.toLowerCase().includes(searchCourse.toLowerCase())
+    course.name.toLowerCase().includes(searchCourse.toLowerCase()) || course.courseCode.toLowerCase().includes(searchCourse.toLowerCase())
   );
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>, course: any) => 
   {
@@ -427,8 +416,7 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
     setAvailableClasses((prevAvailableClasses => 
       prevAvailableClasses.filter((availableCourse) => availableCourse._id !== course._id))
     );
-   
-    
+  
   };           
       
 
@@ -436,7 +424,6 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
   {
     try
     {
-
       const response = await fetch(`https://yourucf.com/api/courses/${courseId}`);
 
       if(!response.ok)
@@ -559,14 +546,13 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
             filteredAvailableClasses.map((course) => (
               <div key={course._id} className="available-course-item" draggable onDragStart={(event) => handleDragStart(event, course)}>
                 <span style={{ marginRight: '10px' }}>{course.courseCode}</span> 
-                <span>{course.courseName}</span>
+                <span>{course.name}</span>
               </div>
             ))
           ) : (
             <p>No available courses</p>
           )}
         </div>
-
       <div className="semester-container">
         {semesters.map((semester) => (
             <div key={semester._id} className="semester-tile" onDragOver={handleDragOver} onDrop={(event) => handleDrop(event, semester._id)} >
