@@ -1,4 +1,15 @@
+* {
+    margin: 0;
+    padding: 0;
+}
 
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+
+}
 
 .navbar {
     font-weight: 500;
@@ -14,6 +25,19 @@
     border-bottom: 4px solid;
     border-color: #F1CA3B;
     border-radius: 15px;
+}
+
+.logo-area {
+    height: 100%;
+    display: flex; 
+    flex-direction: row; 
+    align-items: center; 
+}
+
+.logo-area h1 {
+    font-size: 25px;
+    color: #F1CA3B;
+    transform: translateX(-40%);
 }
 
 .navbar img{
@@ -88,6 +112,13 @@ ul li a:hover{
 
 }
 
+.search-input {
+    color: #1f1f1f;
+}
+.search-input::placeholder {
+    color: #1f1f1f;
+}
+
 
 .available-courses-container {
     max-height: calc(100vh - 60px);
@@ -98,6 +129,7 @@ ul li a:hover{
     border-radius: 15px;
     backdrop-filter: blur(25px);
     border-bottom: 3px solid #F1CA3B;
+    
 }
 
 .available-search-container {
@@ -107,6 +139,14 @@ ul li a:hover{
     height: 40px;
     margin-bottom: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    color: #1f1f1f;
+}
+
+.available-search-container::placeholder {
+    color: #1f1f1f;
+}
+.available-search-container input {
+    color: #1f1f1f;
 }
 
 .search-bar{
@@ -117,9 +157,13 @@ ul li a:hover{
     outline: none;
     border-radius: 7px;
     font-size: 16px;
-    color: #888;
+    color: #1f1f1f;
     font-weight: 600;
     
+}
+
+.search-bar::placeholder{
+    color: #1f1f1f;
 }
 
 .available-course-item {
@@ -201,7 +245,7 @@ ul li a:hover{
 
 .tile-labels {
     background-color: #F1CA3B;
-    color: #f0f0f0;
+    color: #1f1f1f;
     padding: 5px;
     display: flex;
     align-items: center;
@@ -212,6 +256,7 @@ ul li a:hover{
 .delete-button {
     padding:2px;
     background-color: transparent;
+    color: #1f1f1f;
 }
 
 .course-in-semester {
@@ -290,7 +335,7 @@ ul li a:hover{
 }
 
 .search-field {
-    color: #fff;
+    color: #1f1f1f;
     background-color: transparent;
     backdrop-filter: blur(25px);
     box-shadow: 0 5px 7px rgba(0, 0, 0, 0.3);
@@ -309,19 +354,21 @@ ul li a:hover{
     cursor: pointer;
     font-size: 16px;
     font-weight: 600;
-    color: #fff;
+    color: #1f1f1f;
     transition: background-color 0.3s ease, transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;;
 
 }
 
 .Add-Semester-Button:hover, .search-button:hover, .semester-add-button:hover {
     background-color: #5043c0; 
+    color: #fff;
     transform: translateY(-1px); 
     box-shadow: 0 5px 7px rgba(0, 0, 0, 0.3); 
 }
 
 .Add-Semester-Button:active, .search-button:active, .semester-add-button:active {
     background-color: #5043c0; 
+    color: #fff;
     transform: translateY(1px); 
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); 
 }
@@ -358,6 +405,11 @@ ul li a:hover{
     margin-right: 10px;
     padding: 7.5px 5px 0px 5px ;
     border-radius: 7px;
+    
+}
+
+.inputBox1::placeholder {
+    color: #1f1f1f;
 }
 
 .inputBox1 input {
@@ -365,7 +417,7 @@ ul li a:hover{
     border: none;
     outline: none;
     font-size: 16px;
-    color: #888;
+    color: #1f1f1f;
     font-weight: 600;
 }
 
@@ -374,7 +426,7 @@ ul li a:hover{
     border: none;
     outline: none;
     font-size: 16px;
-    color: #888;
+    color: #1f1f1f;
     font-weight: 600;
 }
 
@@ -384,7 +436,7 @@ ul li a:hover{
     border: none;
     outline: none;
     font-size: 16px;
-    color: #888;
+    color: #1f1f1f;
     font-weight: 600;
 }
 
@@ -393,7 +445,7 @@ ul li a:hover{
     border: none;
     outline: none;
     font-size: 16px;
-    color: #888;
+    color: #1f1f1f;
     font-weight: 600;
 }
 
@@ -410,7 +462,7 @@ ul li a:hover{
     border: none;
     outline: none;
     font-size: 16px;
-    color: #888;
+    color: #1f1f1f;
     font-weight: 600;
 }
 
