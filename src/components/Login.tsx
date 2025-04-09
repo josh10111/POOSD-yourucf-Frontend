@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { jwtDecode } from "jwt-decode";
+import { useLocation } from 'react-router-dom';
 import '../Login.css';
-import ucfLogoWebp from '../assets/constellationPegasus.webp';
+import ucfLogo from '../assets/ucf-logo.png';
 
 function Login() {
   const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('error');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -12,6 +14,7 @@ function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [login, setLogin] = useState('');
+  const location = useLocation();
 
   // State to track error status for each input
   const [usernameError, setUsernameError] = useState(false);
@@ -25,6 +28,40 @@ function Login() {
   const [hasUpperCase, setHasUpperCase] = useState(false);
   const [hasLowerCase, setHasLowerCase] = useState(false);
   const [hasSpecialChar, setHasSpecialChar] = useState(false);
+
+  // Check URL parameters on component mount
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    
+    // Check for verification success
+    if (params.get('verified') === 'success') {
+      setMessage('Email successfully verified! You can now log in.');
+      setMessageType('success');
+    } 
+    // Check for verification errors
+    else if (params.get('error')) {
+      const errorType = params.get('error');
+      switch(errorType) {
+        case 'invalid_token':
+          setMessage('Invalid verification link. Please request a new one.');
+          break;
+        case 'user_not_found':
+          setMessage('User not found. Please register again.');
+          break;
+        case 'verification_failed':
+          setMessage('Verification failed. Please try again later.');
+          break;
+        default:
+          setMessage('An error occurred during verification.');
+      }
+      setMessageType('error');
+    }
+    
+    // Clean up URL after processing params
+    if (params.get('verified') || params.get('error')) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [location]);
 
   function is_valid_email_format(emailToCheck: string): boolean {
     const hasAt = emailToCheck.includes('@');
@@ -51,6 +88,7 @@ function Login() {
 
     if (hasErrors) {
       setMessage('Username or password is empty');
+      setMessageType('error');
       return;
     }
 
@@ -65,11 +103,13 @@ function Login() {
             if(!response.ok)
             {
                 setMessage("Invalid username or password");
+                setMessageType('error');
                 return;
             }
             var res = await response.json();
             if(!res.token){
                 setMessage("Login failed: No token");
+                setMessageType('error');
                 return;
             }
 
@@ -77,6 +117,7 @@ function Login() {
 
             if(!decoded.id){
                 setMessage("Login failed: Invalid token data");
+                setMessageType('error');
             }
             var user ={
                 id: decoded.id,
@@ -113,6 +154,7 @@ function Login() {
     } else if (!is_valid_email_format(email)) {
       setEmailError(true);
       setMessage('Please enter a valid email address');
+      setMessageType('error');
       return;
     } else {
       setEmailError(false);
@@ -144,6 +186,7 @@ function Login() {
 
     if (hasErrors) {
       setMessage('Please fill in all fields');
+      setMessageType('error');
       return;
     }
 
@@ -158,8 +201,10 @@ function Login() {
       var res = JSON.parse(await response.text());
       if (res.id <= 0) {
         setMessage('Registration failed');
+        setMessageType('error');
       } else {
         setMessage(`${firstName} ${lastName} signed up successfully!`);
+        setMessageType('success');
         window.location.href = '/verify';
         setIsLogin(true);
       }
@@ -237,8 +282,7 @@ function Login() {
   };
 
   return (
-    <div className='fake-body'>
-<div className="container">
+    <div className="container">
       {(() => {
         if (isLogin) {
           return (
@@ -257,7 +301,7 @@ function Login() {
                   <i className='bx bxs-lock-alt'></i>
                 </div>
 
-                <div className="message">
+                <div className={`message ${messageType === 'success' ? 'success-message' : ''}`}>
                   <span>{message}</span>
                 </div>
 
@@ -318,7 +362,7 @@ function Login() {
                 <PasswordRequirements password={password} />
                 </div>
 
-                <div className="message">
+                <div className={`message ${messageType === 'success' ? 'success-message' : ''}`}>
                   <span>{message}</span>
                 </div>
 
@@ -344,13 +388,12 @@ function Login() {
 
       <div className="toggle-box">
         <div className="panel">
-          <img src={ucfLogoWebp} alt="UCF constellation logo"></img>
+          <img src={ucfLogo} alt="UCF constellation logo"></img>
           <h1>yourUCF</h1>
-          <h2>Chart your UCF path to</h2>
-          <h3>graduation</h3>
+          <h3>Chart your UCF path to</h3>
+          <h2>graduation</h2>
         </div>
       </div>
-    </div>
     </div>
   );
 }
