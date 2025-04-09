@@ -296,7 +296,7 @@ function Login() {
                   <i className='bx bxs-lock-alt'></i>
                 </div>
 
-                <div className="message">
+                <div className={`message ${messageType === 'success' ? 'success-message' : ''}`}>
                   <span>{message}</span>
                 </div>
 
@@ -357,7 +357,7 @@ function Login() {
                 <PasswordRequirements password={password} />
                 </div>
 
-                <div className="message">
+                <div className={`message ${messageType === 'success' ? 'success-message' : ''}`}>
                   <span>{message}</span>
                 </div>
 
