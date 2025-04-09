@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { jwtDecode } from "jwt-decode";
 import { useLocation } from 'react-router-dom';
 import '../Login.css';
-import ucfLogo from '../assets/ucf-logo.png';
+import ucfLogoWebp from '../assets/constellationPegasus.webp';
 
 function Login() {
   const [message, setMessage] = useState('');
@@ -88,7 +88,6 @@ function Login() {
 
     if (hasErrors) {
       setMessage('Username or password is empty');
-      setMessageType('error');
       return;
     }
 
@@ -103,13 +102,11 @@ function Login() {
             if(!response.ok)
             {
                 setMessage("Invalid username or password");
-                setMessageType('error');
                 return;
             }
             var res = await response.json();
             if(!res.token){
                 setMessage("Login failed: No token");
-                setMessageType('error');
                 return;
             }
 
@@ -117,7 +114,6 @@ function Login() {
 
             if(!decoded.id){
                 setMessage("Login failed: Invalid token data");
-                setMessageType('error');
             }
             var user ={
                 id: decoded.id,
@@ -154,7 +150,6 @@ function Login() {
     } else if (!is_valid_email_format(email)) {
       setEmailError(true);
       setMessage('Please enter a valid email address');
-      setMessageType('error');
       return;
     } else {
       setEmailError(false);
@@ -186,7 +181,6 @@ function Login() {
 
     if (hasErrors) {
       setMessage('Please fill in all fields');
-      setMessageType('error');
       return;
     }
 
@@ -282,7 +276,8 @@ function Login() {
   };
 
   return (
-    <div className="container">
+    <div className='fake-body'>
+<div className="container">
       {(() => {
         if (isLogin) {
           return (
@@ -301,7 +296,7 @@ function Login() {
                   <i className='bx bxs-lock-alt'></i>
                 </div>
 
-                <div className={`message ${messageType === 'success' ? 'success-message' : ''}`}>
+                <div className="message">
                   <span>{message}</span>
                 </div>
 
@@ -362,7 +357,7 @@ function Login() {
                 <PasswordRequirements password={password} />
                 </div>
 
-                <div className={`message ${messageType === 'success' ? 'success-message' : ''}`}>
+                <div className="message">
                   <span>{message}</span>
                 </div>
 
@@ -388,12 +383,13 @@ function Login() {
 
       <div className="toggle-box">
         <div className="panel">
-          <img src={ucfLogo} alt="UCF constellation logo"></img>
+          <img src={ucfLogoWebp} alt="UCF constellation logo"></img>
           <h1>yourUCF</h1>
-          <h3>Chart your UCF path to</h3>
-          <h2>graduation</h2>
+          <h2>Chart your UCF path to</h2>
+          <h3>graduation</h3>
         </div>
       </div>
+    </div>
     </div>
   );
 }
