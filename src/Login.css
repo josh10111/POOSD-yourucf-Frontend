@@ -359,6 +359,14 @@ form {
     font-weight: 600;
 }
 
+.success-message {
+    color: #4BB543;
+    background-color: rgba(75, 181, 67, 0.1);
+    padding: 10px;
+    border-radius: 6px;
+    border-left: 3px solid #4BB543;
+}
+
 .passBox {
     margin-top: -25px;
     margin-left: 20px;

@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { jwtDecode } from "jwt-decode";
+import { useLocation } from 'react-router-dom';
 import '../Login.css';
 import ucfLogoWebp from '../assets/constellationPegasus.webp';
 
 function Login() {
   const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('error');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -12,6 +14,7 @@ function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [login, setLogin] = useState('');
+  const location = useLocation();
 
   // State to track error status for each input
   const [usernameError, setUsernameError] = useState(false);
@@ -25,6 +28,40 @@ function Login() {
   const [hasUpperCase, setHasUpperCase] = useState(false);
   const [hasLowerCase, setHasLowerCase] = useState(false);
   const [hasSpecialChar, setHasSpecialChar] = useState(false);
+
+  // Check URL parameters on component mount
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    
+    // Check for verification success
+    if (params.get('verified') === 'success') {
+      setMessage('Email successfully verified! You can now log in.');
+      setMessageType('success');
+    } 
+    // Check for verification errors
+    else if (params.get('error')) {
+      const errorType = params.get('error');
+      switch(errorType) {
+        case 'invalid_token':
+          setMessage('Invalid verification link. Please request a new one.');
+          break;
+        case 'user_not_found':
+          setMessage('User not found. Please register again.');
+          break;
+        case 'verification_failed':
+          setMessage('Verification failed. Please try again later.');
+          break;
+        default:
+          setMessage('An error occurred during verification.');
+      }
+      setMessageType('error');
+    }
+    
+    // Clean up URL after processing params
+    if (params.get('verified') || params.get('error')) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [location]);
 
   function is_valid_email_format(emailToCheck: string): boolean {
     const hasAt = emailToCheck.includes('@');
@@ -158,8 +195,10 @@ function Login() {
       var res = JSON.parse(await response.text());
       if (res.id <= 0) {
         setMessage('Registration failed');
+        setMessageType('error');
       } else {
         setMessage(`${firstName} ${lastName} signed up successfully!`);
+        setMessageType('success');
         window.location.href = '/verify';
         setIsLogin(true);
       }
