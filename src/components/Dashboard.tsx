@@ -67,7 +67,6 @@ function Dashboard()
             }
           } 
           const takenCourses: string[] = [];
-  
           if (plansData.semesters) 
           {
             
@@ -395,6 +394,7 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
     (course.courseName && course.courseName.toLowerCase().includes(searchCourse.toLowerCase())) ||
     (course.courseCode && course.courseCode.toLowerCase().includes(searchCourse.toLowerCase()))
   );
+  
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>, course: any) => 
   {
     event.dataTransfer.setData('text/plain', JSON.stringify(course));
