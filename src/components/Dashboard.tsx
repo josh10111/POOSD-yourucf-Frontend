@@ -26,21 +26,46 @@ function Dashboard()
         console.log('Extracted userId:', ud.id);
   
         try {
-          const [plansResponse, availableResponse] = await Promise.all([
+          const [plansResponse, availableResponse, allCoursesResponse] = await Promise.all([
             fetch(`https://yourucf.com/api/plans/user/${ud.id}`),
             fetch(`https://yourucf.com/api/plans/available/${ud.id}`), 
+            fetch(`https://yourucf.com/api/courses`), 
           ]);
   
-          if (!plansResponse.ok) {
-            throw new Error(`Failed to fetch plans: ${plansResponse.status}`);
+
+          let plansData = [];
+
+          if(plansResponse.ok)
+          {
+            plansData = await plansResponse.json();
           }
-          if (!availableResponse.ok) {
-            throw new Error(`Failed to fetch available courses: ${availableResponse.status}`);
+          else if(plansResponse.status === 404)
+          {
+              plansData = [];
           }
-  
-          const plansData = await plansResponse.json();
-          const availableData = await availableResponse.json();
-          setAvailableClasses(availableData);
+          else 
+          {
+            console.log(`Failed to fetch plans: ${plansResponse.status}`);
+          }
+
+          if (availableResponse.ok) 
+          {
+            const availableData = await availableResponse.json();
+            setAvailableClasses(availableData);
+          } 
+          else
+          {
+            console.log(`Failed to fetch available courses: ${availableResponse.status}`);
+            if (allCoursesResponse.ok)
+            {
+              const allData = await allCoursesResponse.json();
+              setAvailableClasses(allData);
+            }
+            else
+            {
+              setMessage('Try again later.')
+            }
+          } 
           const takenCourses: string[] = [];
   
           if (plansData.semesters) 
@@ -366,7 +391,9 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
 
   }
   const filteredAvailableClasses = availableClasses.filter(course =>
-    course.name.toLowerCase().includes(searchCourse.toLowerCase()) || course.courseCode.toLowerCase().includes(searchCourse.toLowerCase())
+    (course.name && course.name.toLowerCase().includes(searchCourse.toLowerCase())) ||
+    (course.courseName && course.courseName.toLowerCase().includes(searchCourse.toLowerCase())) ||
+    (course.courseCode && course.courseCode.toLowerCase().includes(searchCourse.toLowerCase()))
   );
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>, course: any) => 
   {
@@ -661,7 +688,7 @@ async function searchSemester(searchValue:string, searchMode: number) : Promise<
                 filteredAvailableClasses.map((course) => (
                   <div key={course._id} className="available-course-item" draggable onDragStart={(event) => handleDragStart(event, course)}>
                     <span style={{ marginRight: '10px' }}>{course.courseCode}</span> 
-                    <span>{course.name}</span>
+                    <span>{course.name || course.courseName}</span>
                   </div>
                 ))
               ) : (
